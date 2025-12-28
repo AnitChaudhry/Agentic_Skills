@@ -1,0 +1,44 @@
+{
+  "day": 28,
+  "title": "Week 4 Review & Project",
+  "topics": [
+    "Review: APIs, Forms, Styling",
+    "Project: Weather App"
+  ],
+  "todos": [
+    {
+      "id": "d28-t1",
+      "title": "Review Week 4 concepts",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d28-t2",
+      "title": "PROJECT: Weather App - API setup",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d28-t3",
+      "title": "PROJECT: Search and display weather",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d28-t4",
+      "title": "PROJECT: Handle loading and errors",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d28-t5",
+      "title": "PROJECT: Style with your chosen method",
+      "duration": 10,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Complete your Weather App!",
+  "totalMinutes": 60,
+  "completed": false,
+  "project": "Weather App"
+}

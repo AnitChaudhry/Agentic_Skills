@@ -1,0 +1,45 @@
+{
+  "day": 23,
+  "title": "Async/Await in React",
+  "topics": [
+    "async/await syntax",
+    "Try/catch in React",
+    "Custom fetch hook",
+    "Race conditions"
+  ],
+  "todos": [
+    {
+      "id": "d23-t1",
+      "title": "Refactor fetch to async/await",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d23-t2",
+      "title": "Proper error handling",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d23-t3",
+      "title": "Create useFetch custom hook",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d23-t4",
+      "title": "Handle race conditions",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d23-t5",
+      "title": "Add abort controller",
+      "duration": 10,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Write clean async code in React!",
+  "totalMinutes": 60,
+  "completed": false
+}

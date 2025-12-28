@@ -1,0 +1,45 @@
+{
+  "day": 16,
+  "title": "React Router Basics",
+  "topics": [
+    "Installing React Router",
+    "BrowserRouter",
+    "Routes and Route",
+    "Link component"
+  ],
+  "todos": [
+    {
+      "id": "d16-t1",
+      "title": "Install react-router-dom",
+      "duration": 5,
+      "status": "pending"
+    },
+    {
+      "id": "d16-t2",
+      "title": "Set up BrowserRouter",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d16-t3",
+      "title": "Create basic routes",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d16-t4",
+      "title": "Navigate with Link",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d16-t5",
+      "title": "Build a simple multi-page layout",
+      "duration": 15,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Navigate between pages in React!",
+  "totalMinutes": 60,
+  "completed": false
+}

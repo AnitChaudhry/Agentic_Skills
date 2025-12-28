@@ -1,0 +1,45 @@
+{
+  "day": 17,
+  "title": "React Router Advanced",
+  "topics": [
+    "Route parameters",
+    "Nested routes",
+    "useParams",
+    "useNavigate"
+  ],
+  "todos": [
+    {
+      "id": "d17-t1",
+      "title": "Learn: Dynamic route parameters",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d17-t2",
+      "title": "Use useParams hook",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d17-t3",
+      "title": "Create nested routes",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d17-t4",
+      "title": "Programmatic navigation",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d17-t5",
+      "title": "Build a product detail page pattern",
+      "duration": 10,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Create dynamic routes for any data!",
+  "totalMinutes": 60,
+  "completed": false
+}

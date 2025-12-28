@@ -1,0 +1,45 @@
+{
+  "day": 26,
+  "title": "Testing Basics",
+  "topics": [
+    "React Testing Library",
+    "Rendering components",
+    "User events",
+    "Assertions"
+  ],
+  "todos": [
+    {
+      "id": "d26-t1",
+      "title": "Set up testing environment",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d26-t2",
+      "title": "Write your first test",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d26-t3",
+      "title": "Test user interactions",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d26-t4",
+      "title": "Test async behavior",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d26-t5",
+      "title": "Add tests to your Todo app",
+      "duration": 10,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Write tests for your React components!",
+  "totalMinutes": 60,
+  "completed": false
+}

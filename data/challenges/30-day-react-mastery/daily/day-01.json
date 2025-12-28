@@ -1,0 +1,45 @@
+{
+  "day": 1,
+  "title": "Introduction to React",
+  "topics": [
+    "What is React?",
+    "Why use React?",
+    "Development environment setup",
+    "Create React App"
+  ],
+  "todos": [
+    {
+      "id": "d1-t1",
+      "title": "Watch: What is React? (10 min)",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d1-t2",
+      "title": "Install Node.js and npm",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d1-t3",
+      "title": "Create your first React app with CRA",
+      "duration": 20,
+      "status": "pending"
+    },
+    {
+      "id": "d1-t4",
+      "title": "Explore the file structure",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d1-t5",
+      "title": "Modify App.js and see hot reload",
+      "duration": 10,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "See your first React app running in the browser!",
+  "totalMinutes": 60,
+  "completed": false
+}

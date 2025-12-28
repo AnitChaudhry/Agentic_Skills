@@ -1,0 +1,45 @@
+{
+  "day": 25,
+  "title": "Styling in React",
+  "topics": [
+    "CSS Modules",
+    "Styled Components",
+    "Tailwind CSS",
+    "Choosing a solution"
+  ],
+  "todos": [
+    {
+      "id": "d25-t1",
+      "title": "Try CSS Modules",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d25-t2",
+      "title": "Try Styled Components",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d25-t3",
+      "title": "Try Tailwind CSS",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d25-t4",
+      "title": "Compare approaches",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d25-t5",
+      "title": "Pick one for your projects",
+      "duration": 5,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Find your favorite React styling approach!",
+  "totalMinutes": 60,
+  "completed": false
+}

@@ -1,0 +1,71 @@
+import { NextRequest, NextResponse } from 'next/server'
+import fs from 'fs/promises'
+import path from 'path'
+import { PATHS } from '@/lib/paths'
+
+export async function GET() {
+  try {
+    const activeFile = path.join(PATHS.todos, 'active.json')
+
+    try {
+      const data = await fs.readFile(activeFile, 'utf-8')
+      return NextResponse.json(JSON.parse(data))
+    } catch {
+      return NextResponse.json([])
+    }
+  } catch (error) {
+    console.error('Failed to load todos:', error)
+    return NextResponse.json([], { status: 500 })
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const todo = await request.json()
+    const todosDir = PATHS.todos
+    const activeFile = path.join(todosDir, 'active.json')
+
+    await fs.mkdir(todosDir, { recursive: true })
+
+    let todos = []
+    try {
+      const data = await fs.readFile(activeFile, 'utf-8')
+      todos = JSON.parse(data)
+    } catch {
+      // File doesn't exist
+    }
+
+    const newTodo = {
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      ...todo,
+    }
+
+    todos.push(newTodo)
+    await fs.writeFile(activeFile, JSON.stringify(todos, null, 2))
+
+    // Log to index.md
+    try {
+      await fetch(`${request.nextUrl.origin}/api/system/index`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'file_modified',
+          data: {
+            filePath: 'todos/active.json',
+            original: `${todos.length - 1} todos`,
+            changes: `Added todo: ${newTodo.title}`,
+            date: new Date().toISOString(),
+          },
+        }),
+      })
+    } catch (error) {
+      console.error('Failed to update index.md:', error)
+    }
+
+    return NextResponse.json(newTodo)
+  } catch (error) {
+    console.error('Failed to create todo:', error)
+    return NextResponse.json({ error: 'Failed to create todo' }, { status: 500 })
+  }
+}

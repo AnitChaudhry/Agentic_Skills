@@ -1,0 +1,45 @@
+{
+  "day": 20,
+  "title": "Performance Optimization",
+  "topics": [
+    "React.memo",
+    "useMemo",
+    "useCallback",
+    "Avoiding re-renders"
+  ],
+  "todos": [
+    {
+      "id": "d20-t1",
+      "title": "Learn: When React re-renders",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d20-t2",
+      "title": "Use React.memo effectively",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d20-t3",
+      "title": "Memoize values with useMemo",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d20-t4",
+      "title": "Memoize functions with useCallback",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d20-t5",
+      "title": "Profile and optimize a component",
+      "duration": 10,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Make your React app faster!",
+  "totalMinutes": 60,
+  "completed": false
+}

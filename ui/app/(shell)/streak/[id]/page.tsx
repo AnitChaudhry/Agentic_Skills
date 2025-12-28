@@ -1,0 +1,446 @@
+'use client'
+
+import React, { useEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
+import {
+  Flame, Trophy, Calendar, TrendingUp, Clock, Target,
+  AlertCircle, CheckCircle, XCircle, ArrowLeft
+} from 'lucide-react'
+import { AnimatedButton } from '@/components/ui/AnimatedButton'
+import type { Challenge, Milestone } from '@/types/streak'
+
+export default function StreakDetailPage() {
+  const params = useParams()
+  const router = useRouter()
+  const challengeId = params.id as string
+
+  const [challenge, setChallenge] = useState<Challenge | null>(null)
+  const [milestones, setMilestones] = useState<Milestone[]>([])
+  const [activityHistory, setActivityHistory] = useState<any[]>([])
+  const [backlogTasks, setBacklogTasks] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    loadChallengeDetails()
+  }, [challengeId])
+
+  const loadChallengeDetails = async () => {
+    try {
+      // Load challenge
+      const challengeRes = await fetch(`/api/challenges?id=${challengeId}`)
+      const challengeData = await challengeRes.json()
+
+      if (challengeData.challenges && challengeData.challenges.length > 0) {
+        const found = challengeData.challenges.find((c: Challenge) => c.id === challengeId)
+        setChallenge(found || null)
+      }
+
+      // Load activity history
+      try {
+        const activityRes = await fetch(`/api/challenges/${challengeId}/activity-log`)
+        const activityData = await activityRes.json()
+        setActivityHistory(activityData.activities || [])
+      } catch (err) {
+        console.error('Failed to load activity history:', err)
+      }
+
+      // Load milestones from progress.md
+      try {
+        const progressRes = await fetch(`/api/challenges/${challengeId}/progress`)
+        const progressData = await progressRes.json()
+        setMilestones(progressData.milestones || [])
+      } catch (err) {
+        console.error('Failed to load milestones:', err)
+      }
+
+      // Load backlog
+      try {
+        const backlogRes = await fetch(`/api/challenges/${challengeId}/backlog`)
+        const backlogData = await backlogRes.json()
+        setBacklogTasks(backlogData.tasks || [])
+      } catch (err) {
+        console.error('Failed to load backlog:', err)
+      }
+    } catch (error) {
+      console.error('Failed to load challenge details:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleCheckIn = async () => {
+    try {
+      await fetch('/api/checkin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          challengeId,
+          date: new Date().toISOString(),
+          notes: 'Manual check-in from streak page',
+        }),
+      })
+      loadChallengeDetails()
+    } catch (error) {
+      console.error('Check-in failed:', error)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-oa-text-secondary">Loading streak details...</div>
+      </div>
+    )
+  }
+
+  if (!challenge) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <AlertCircle className="w-16 h-16 text-oa-text-secondary mb-4" />
+        <p className="text-oa-text-secondary mb-6">Challenge not found</p>
+        <AnimatedButton variant="secondary" onClick={() => router.push('/streak')}>
+          Back to Streaks
+        </AnimatedButton>
+      </div>
+    )
+  }
+
+  const daysRemaining = challenge.targetDate
+    ? Math.ceil((new Date(challenge.targetDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'text-green-500'
+      case 'paused':
+        return 'text-yellow-500'
+      case 'completed':
+        return 'text-blue-500'
+      case 'failed':
+        return 'text-red-500'
+      default:
+        return 'text-gray-500'
+    }
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="px-8 py-6 border-b border-oa-border">
+        <div className="flex items-center gap-4 mb-4">
+          <AnimatedButton
+            variant="ghost"
+            size="sm"
+            icon={ArrowLeft}
+            onClick={() => router.push('/streak')}
+          >
+            Back
+          </AnimatedButton>
+        </div>
+        <h1 className="text-2xl font-semibold text-oa-text-primary mb-2">
+          {challenge.name}
+        </h1>
+        <p className="text-sm text-oa-text-secondary">{challenge.goal}</p>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto px-8 py-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Current Streak */}
+            <motion.div
+              className="bg-oa-bg-secondary border border-oa-border rounded-lg p-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <Flame className="w-5 h-5 text-orange-500" />
+                <span className="text-sm text-oa-text-secondary">Current Streak</span>
+              </div>
+              <div className="text-3xl font-bold text-oa-text-primary">
+                {challenge.streak.current}
+              </div>
+              <div className="text-xs text-oa-text-secondary">days</div>
+            </motion.div>
+
+            {/* Best Streak */}
+            <motion.div
+              className="bg-oa-bg-secondary border border-oa-border rounded-lg p-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <Trophy className="w-5 h-5 text-yellow-500" />
+                <span className="text-sm text-oa-text-secondary">Best Streak</span>
+              </div>
+              <div className="text-3xl font-bold text-oa-text-primary">
+                {challenge.streak.best}
+              </div>
+              <div className="text-xs text-oa-text-secondary">days</div>
+            </motion.div>
+
+            {/* Progress */}
+            <motion.div
+              className="bg-oa-bg-secondary border border-oa-border rounded-lg p-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <TrendingUp className="w-5 h-5 text-blue-500" />
+                <span className="text-sm text-oa-text-secondary">Progress</span>
+              </div>
+              <div className="text-3xl font-bold text-oa-text-primary">
+                {challenge.progress}%
+              </div>
+              <div className="text-xs text-oa-text-secondary">complete</div>
+            </motion.div>
+
+            {/* Days Remaining */}
+            <motion.div
+              className="bg-oa-bg-secondary border border-oa-border rounded-lg p-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <Calendar className="w-5 h-5 text-purple-500" />
+                <span className="text-sm text-oa-text-secondary">Days Left</span>
+              </div>
+              <div className="text-3xl font-bold text-oa-text-primary">
+                {daysRemaining !== null ? daysRemaining : '∞'}
+              </div>
+              <div className="text-xs text-oa-text-secondary">
+                {daysRemaining !== null ? 'days' : 'no deadline'}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Check-in Section */}
+          <motion.div
+            className="bg-oa-bg-secondary border border-oa-border rounded-lg p-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <h2 className="text-lg font-semibold text-oa-text-primary mb-4">
+              Daily Check-in
+            </h2>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-oa-text-secondary mb-1">
+                  Last check-in: {new Date(challenge.streak.lastCheckin).toLocaleDateString()}
+                </p>
+                <p className="text-sm text-oa-text-secondary">
+                  Status: <span className={`font-medium ${getStatusColor(challenge.status)}`}>
+                    {challenge.status}
+                  </span>
+                </p>
+              </div>
+              <AnimatedButton variant="primary" onClick={handleCheckIn}>
+                <CheckCircle className="w-4 h-4" />
+                Check In Today
+              </AnimatedButton>
+            </div>
+          </motion.div>
+
+          {/* Challenge Details */}
+          <motion.div
+            className="bg-oa-bg-secondary border border-oa-border rounded-lg p-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <h2 className="text-lg font-semibold text-oa-text-primary mb-4">
+              Challenge Details
+            </h2>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-sm text-oa-text-secondary">Type:</span>
+                <span className="text-sm font-medium text-oa-text-primary">
+                  {challenge.type}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-oa-text-secondary">Start Date:</span>
+                <span className="text-sm font-medium text-oa-text-primary">
+                  {new Date(challenge.startDate).toLocaleDateString()}
+                </span>
+              </div>
+              {challenge.targetDate && (
+                <div className="flex justify-between">
+                  <span className="text-sm text-oa-text-secondary">Target Date:</span>
+                  <span className="text-sm font-medium text-oa-text-primary">
+                    {new Date(challenge.targetDate).toLocaleDateString()}
+                  </span>
+                </div>
+              )}
+              {challenge.dailyHours && (
+                <div className="flex justify-between">
+                  <span className="text-sm text-oa-text-secondary">Daily Commitment:</span>
+                  <span className="text-sm font-medium text-oa-text-primary">
+                    {challenge.dailyHours} hours/day
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-sm text-oa-text-secondary">Missed Days:</span>
+                <span className="text-sm font-medium text-oa-text-primary">
+                  {challenge.streak.missedDays}
+                </span>
+              </div>
+              {challenge.gracePeriod !== undefined && (
+                <div className="flex justify-between">
+                  <span className="text-sm text-oa-text-secondary">Grace Period:</span>
+                  <span className="text-sm font-medium text-oa-text-primary">
+                    {challenge.gracePeriod} hours
+                  </span>
+                </div>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Milestones */}
+          {milestones.length > 0 && (
+            <motion.div
+              className="bg-oa-bg-secondary border border-oa-border rounded-lg p-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+            >
+              <h2 className="text-lg font-semibold text-oa-text-primary mb-4">
+                Milestones
+              </h2>
+              <div className="space-y-2">
+                {milestones.map((milestone) => (
+                  <div key={milestone.id} className="flex items-center gap-3">
+                    {milestone.achieved ? (
+                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full border-2 border-oa-border flex-shrink-0" />
+                    )}
+                    <span className={`text-sm ${
+                      milestone.achieved
+                        ? 'text-oa-text-secondary line-through'
+                        : 'text-oa-text-primary'
+                    }`}>
+                      {milestone.title}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Activity History */}
+          {activityHistory.length > 0 && (
+            <motion.div
+              className="bg-oa-bg-secondary border border-oa-border rounded-lg p-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              <h2 className="text-lg font-semibold text-oa-text-primary mb-4">
+                Activity History
+              </h2>
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {activityHistory.slice().reverse().map((activity, idx) => (
+                  <div key={idx} className="border-l-2 border-oa-border pl-4 py-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-oa-text-primary">
+                          Day {activity.day}
+                        </span>
+                        <span className="text-xs text-oa-text-secondary">
+                          {new Date(activity.date).toLocaleDateString()}
+                        </span>
+                      </div>
+                      {activity.status === 'completed' ? (
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                      ) : activity.status === 'missed' ? (
+                        <XCircle className="w-4 h-4 text-red-500" />
+                      ) : (
+                        <Clock className="w-4 h-4 text-yellow-500" />
+                      )}
+                    </div>
+                    {activity.timeSpent && (
+                      <p className="text-xs text-oa-text-secondary">
+                        Time: {activity.timeSpent}
+                      </p>
+                    )}
+                    {activity.streak > 0 && (
+                      <p className="text-xs text-oa-text-secondary flex items-center gap-1">
+                        <Flame className="w-3 h-3 text-orange-500" />
+                        {activity.streak} day{activity.streak !== 1 ? 's' : ''}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Punishment Contract */}
+          {challenge.punishments && challenge.punishments.length > 0 && (
+            <motion.div
+              className="bg-red-500/5 border border-red-500/20 rounded-lg p-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 }}
+            >
+              <h2 className="text-lg font-semibold text-oa-text-primary mb-4 flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-red-500" />
+                Accountability Contract
+              </h2>
+              {challenge.punishments.map((punishment) => (
+                <div key={punishment.id} className="mb-3 last:mb-0">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-oa-text-primary">
+                      {punishment.type.replace(/_/g, ' ')}
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      punishment.status === 'active' ? 'bg-yellow-500/10 text-yellow-500' :
+                      punishment.status === 'triggered' ? 'bg-orange-500/10 text-orange-500' :
+                      punishment.status === 'executed' ? 'bg-red-500/10 text-red-500' :
+                      'bg-green-500/10 text-green-500'
+                    }`}>
+                      {punishment.status}
+                    </span>
+                  </div>
+                  <p className="text-sm text-oa-text-secondary">
+                    {punishment.consequence.description}
+                  </p>
+                </div>
+              ))}
+            </motion.div>
+          )}
+
+          {/* Actions */}
+          <div className="flex gap-4">
+            <AnimatedButton
+              variant="secondary"
+              fullWidth
+              onClick={() => router.push(`/plan?challenge=${challengeId}`)}
+            >
+              <Target className="w-4 h-4" />
+              View Plan
+            </AnimatedButton>
+            <AnimatedButton
+              variant="secondary"
+              fullWidth
+              onClick={() => router.push(`/schedule?challenge=${challengeId}`)}
+            >
+              <Clock className="w-4 h-4" />
+              View Schedule
+            </AnimatedButton>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,45 @@
+{
+  "day": 12,
+  "title": "Custom Hooks",
+  "topics": [
+    "Extracting logic into hooks",
+    "Hook rules",
+    "Reusable patterns",
+    "useToggle example"
+  ],
+  "todos": [
+    {
+      "id": "d12-t1",
+      "title": "Learn: Why custom hooks?",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d12-t2",
+      "title": "Create useToggle hook",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d12-t3",
+      "title": "Create useLocalStorage hook",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d12-t4",
+      "title": "Follow hook naming rules",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d12-t5",
+      "title": "Refactor existing code to use hooks",
+      "duration": 10,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Write reusable logic with custom hooks!",
+  "totalMinutes": 60,
+  "completed": false
+}

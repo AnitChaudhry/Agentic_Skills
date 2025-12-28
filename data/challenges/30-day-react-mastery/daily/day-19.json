@@ -1,0 +1,45 @@
+{
+  "day": 19,
+  "title": "useReducer Hook",
+  "topics": [
+    "Reducer pattern",
+    "Actions and dispatch",
+    "useReducer vs useState",
+    "Complex state"
+  ],
+  "todos": [
+    {
+      "id": "d19-t1",
+      "title": "Learn: Reducer pattern basics",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d19-t2",
+      "title": "Write your first reducer",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d19-t3",
+      "title": "Dispatch actions",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d19-t4",
+      "title": "Refactor counter to useReducer",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d19-t5",
+      "title": "Decide when to use useReducer",
+      "duration": 10,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Handle complex state logic!",
+  "totalMinutes": 60,
+  "completed": false
+}

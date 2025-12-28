@@ -1,0 +1,45 @@
+{
+  "day": 5,
+  "title": "State with useState",
+  "topics": [
+    "What is state?",
+    "useState hook",
+    "Updating state",
+    "State vs props"
+  ],
+  "todos": [
+    {
+      "id": "d5-t1",
+      "title": "Learn: State concept in React",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d5-t2",
+      "title": "Use useState hook",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d5-t3",
+      "title": "Update state correctly (immutability)",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d5-t4",
+      "title": "Build a simple counter",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d5-t5",
+      "title": "Understand state vs props",
+      "duration": 10,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Create interactive components that remember things!",
+  "totalMinutes": 60,
+  "completed": false
+}

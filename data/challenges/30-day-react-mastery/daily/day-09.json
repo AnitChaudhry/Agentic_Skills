@@ -1,0 +1,45 @@
+{
+  "day": 9,
+  "title": "Lists and Keys",
+  "topics": [
+    "Array.map() in JSX",
+    "Keys explained",
+    "Unique key patterns",
+    "Common mistakes"
+  ],
+  "todos": [
+    {
+      "id": "d9-t1",
+      "title": "Learn: Rendering lists with map()",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d9-t2",
+      "title": "Understand why keys matter",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d9-t3",
+      "title": "Practice with array of objects",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d9-t4",
+      "title": "Handle empty lists",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d9-t5",
+      "title": "Build a list component",
+      "duration": 10,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Render dynamic lists from data!",
+  "totalMinutes": 60,
+  "completed": false
+}

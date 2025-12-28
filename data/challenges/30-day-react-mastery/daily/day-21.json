@@ -1,0 +1,44 @@
+{
+  "day": 21,
+  "title": "Week 3 Review & Project",
+  "topics": [
+    "Review: Router, State Management",
+    "Project: Blog App"
+  ],
+  "todos": [
+    {
+      "id": "d21-t1",
+      "title": "Review Week 3 concepts",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d21-t2",
+      "title": "PROJECT: Blog App - Setup and routing",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d21-t3",
+      "title": "PROJECT: Create post list and detail pages",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d21-t4",
+      "title": "PROJECT: Add global state with Context",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d21-t5",
+      "title": "PROJECT: Style and navigation",
+      "duration": 5,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Complete your Blog App with routing!",
+  "totalMinutes": 60,
+  "completed": false,
+  "project": "Blog App"
+}

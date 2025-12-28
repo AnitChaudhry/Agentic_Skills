@@ -1,0 +1,45 @@
+{
+  "day": 6,
+  "title": "Event Handling",
+  "topics": [
+    "onClick and other events",
+    "Event object",
+    "Preventing default",
+    "Passing arguments"
+  ],
+  "todos": [
+    {
+      "id": "d6-t1",
+      "title": "Learn: Event handling in React",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d6-t2",
+      "title": "Handle click events",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d6-t3",
+      "title": "Work with the event object",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d6-t4",
+      "title": "Prevent default behavior",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d6-t5",
+      "title": "Pass arguments to event handlers",
+      "duration": 15,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Make your app respond to user actions!",
+  "totalMinutes": 60,
+  "completed": false
+}

@@ -1,0 +1,294 @@
+// WebSocket client for communication with Claude Code CLI
+// Claude Code runs a WebSocket server that the UI connects to
+
+type MessageHandler = (message: WebSocketMessage) => void
+type ConnectionHandler = (connected: boolean) => void
+
+export interface WebSocketMessage {
+  type: 'chat' | 'status' | 'file_update' | 'error' | 'typing' | 'response_start' | 'response_chunk' | 'response_end'
+  agentId?: string
+  content?: string
+  data?: Record<string, any>
+  timestamp?: string
+  requestId?: string
+}
+
+export interface PendingRequest {
+  resolve: (value: string) => void
+  reject: (error: Error) => void
+  chunks: string[]
+}
+
+class WebSocketClient {
+  private ws: WebSocket | null = null
+  private url: string
+  private reconnectAttempts = 0
+  private maxReconnectAttempts = 5
+  private reconnectDelay = 2000
+  private messageHandlers: Set<MessageHandler> = new Set()
+  private connectionHandlers: Set<ConnectionHandler> = new Set()
+  private pendingRequests: Map<string, PendingRequest> = new Map()
+  private isConnecting = false
+  private shouldReconnect = true
+
+  constructor(url: string = 'ws://localhost:8765') {
+    this.url = url
+  }
+
+  // Connect to Claude Code's WebSocket server
+  connect(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (this.ws?.readyState === WebSocket.OPEN) {
+        resolve()
+        return
+      }
+
+      if (this.isConnecting) {
+        // Wait for existing connection attempt
+        const checkConnection = setInterval(() => {
+          if (this.ws?.readyState === WebSocket.OPEN) {
+            clearInterval(checkConnection)
+            resolve()
+          }
+        }, 100)
+        return
+      }
+
+      this.isConnecting = true
+      this.shouldReconnect = true
+
+      try {
+        this.ws = new WebSocket(this.url)
+
+        this.ws.onopen = () => {
+          console.log('[WebSocket] Connected to Claude Code')
+          this.isConnecting = false
+          this.reconnectAttempts = 0
+          this.notifyConnectionHandlers(true)
+          resolve()
+        }
+
+        this.ws.onmessage = (event) => {
+          try {
+            const message: WebSocketMessage = JSON.parse(event.data)
+            this.handleMessage(message)
+          } catch (error) {
+            console.error('[WebSocket] Failed to parse message:', error)
+          }
+        }
+
+        this.ws.onclose = (event) => {
+          console.log('[WebSocket] Connection closed:', event.code, event.reason)
+          this.isConnecting = false
+          this.notifyConnectionHandlers(false)
+
+          // Attempt to reconnect if not intentionally closed
+          if (this.shouldReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
+            this.scheduleReconnect()
+          }
+        }
+
+        this.ws.onerror = (error) => {
+          console.error('[WebSocket] Error:', error)
+          this.isConnecting = false
+
+          if (this.reconnectAttempts === 0) {
+            reject(new Error('Failed to connect to Claude Code WebSocket server'))
+          }
+        }
+      } catch (error) {
+        this.isConnecting = false
+        reject(error)
+      }
+    })
+  }
+
+  // Disconnect from WebSocket server
+  disconnect(): void {
+    this.shouldReconnect = false
+    if (this.ws) {
+      this.ws.close(1000, 'Client disconnecting')
+      this.ws = null
+    }
+  }
+
+  // Send a message through WebSocket
+  private send(message: WebSocketMessage): void {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(message))
+    } else {
+      console.error('[WebSocket] Cannot send - not connected')
+      throw new Error('WebSocket not connected')
+    }
+  }
+
+  // Send a chat message and wait for response
+  sendChatMessage(agentId: string, content: string, attachments?: string[]): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const requestId = `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+
+      // Store the pending request
+      this.pendingRequests.set(requestId, {
+        resolve,
+        reject,
+        chunks: [],
+      })
+
+      // Set a timeout for the response
+      const timeout = setTimeout(() => {
+        const pending = this.pendingRequests.get(requestId)
+        if (pending) {
+          this.pendingRequests.delete(requestId)
+          reject(new Error('Response timeout'))
+        }
+      }, 120000) // 2 minute timeout
+
+      // Send the message
+      try {
+        this.send({
+          type: 'chat',
+          agentId,
+          content,
+          requestId,
+          timestamp: new Date().toISOString(),
+          data: { attachments },
+        })
+      } catch (error) {
+        clearTimeout(timeout)
+        this.pendingRequests.delete(requestId)
+        reject(error)
+      }
+    })
+  }
+
+  // Handle incoming messages
+  private handleMessage(message: WebSocketMessage): void {
+    // Notify all registered handlers
+    this.messageHandlers.forEach(handler => handler(message))
+
+    // Handle specific message types
+    switch (message.type) {
+      case 'response_start':
+        // Claude Code is starting to respond
+        break
+
+      case 'response_chunk':
+        // Streaming response chunk
+        if (message.requestId) {
+          const pending = this.pendingRequests.get(message.requestId)
+          if (pending && message.content) {
+            pending.chunks.push(message.content)
+          }
+        }
+        break
+
+      case 'response_end':
+        // Response complete
+        if (message.requestId) {
+          const pending = this.pendingRequests.get(message.requestId)
+          if (pending) {
+            const fullResponse = pending.chunks.join('')
+            this.pendingRequests.delete(message.requestId)
+            pending.resolve(fullResponse)
+          }
+        }
+        break
+
+      case 'error':
+        // Error response
+        if (message.requestId) {
+          const pending = this.pendingRequests.get(message.requestId)
+          if (pending) {
+            this.pendingRequests.delete(message.requestId)
+            pending.reject(new Error(message.content || 'Unknown error'))
+          }
+        }
+        break
+
+      case 'file_update':
+        // File was updated by Claude Code
+        // The UI can react to this (e.g., refresh file tree, update plan view)
+        break
+
+      case 'typing':
+        // Claude Code is typing
+        break
+    }
+  }
+
+  // Schedule a reconnection attempt
+  private scheduleReconnect(): void {
+    this.reconnectAttempts++
+    const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1)
+
+    console.log(`[WebSocket] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`)
+
+    setTimeout(() => {
+      if (this.shouldReconnect) {
+        this.connect().catch(error => {
+          console.error('[WebSocket] Reconnection failed:', error)
+        })
+      }
+    }, delay)
+  }
+
+  // Register a message handler
+  onMessage(handler: MessageHandler): () => void {
+    this.messageHandlers.add(handler)
+    return () => this.messageHandlers.delete(handler)
+  }
+
+  // Register a connection status handler
+  onConnectionChange(handler: ConnectionHandler): () => void {
+    this.connectionHandlers.add(handler)
+    return () => this.connectionHandlers.delete(handler)
+  }
+
+  // Notify connection handlers
+  private notifyConnectionHandlers(connected: boolean): void {
+    this.connectionHandlers.forEach(handler => handler(connected))
+  }
+
+  // Check if connected
+  isConnected(): boolean {
+    return this.ws?.readyState === WebSocket.OPEN
+  }
+
+  // Get connection status
+  getStatus(): 'connected' | 'connecting' | 'disconnected' {
+    if (this.ws?.readyState === WebSocket.OPEN) return 'connected'
+    if (this.isConnecting || this.ws?.readyState === WebSocket.CONNECTING) return 'connecting'
+    return 'disconnected'
+  }
+}
+
+// Singleton instance
+let wsClient: WebSocketClient | null = null
+
+export function getWebSocketClient(): WebSocketClient {
+  if (!wsClient) {
+    // Check for custom WebSocket URL from environment
+    const wsUrl = typeof window !== 'undefined'
+      ? (window as any).__CLAUDE_WS_URL__ || process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8765'
+      : 'ws://localhost:8765'
+
+    wsClient = new WebSocketClient(wsUrl)
+  }
+  return wsClient
+}
+
+// React hook for WebSocket connection
+export function useWebSocket() {
+  // This hook will be used in components to get WebSocket status and send messages
+  const client = getWebSocketClient()
+
+  return {
+    connect: () => client.connect(),
+    disconnect: () => client.disconnect(),
+    sendMessage: (agentId: string, content: string) => client.sendChatMessage(agentId, content),
+    onMessage: (handler: MessageHandler) => client.onMessage(handler),
+    onConnectionChange: (handler: ConnectionHandler) => client.onConnectionChange(handler),
+    isConnected: () => client.isConnected(),
+    getStatus: () => client.getStatus(),
+  }
+}

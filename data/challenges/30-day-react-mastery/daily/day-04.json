@@ -1,0 +1,45 @@
+{
+  "day": 4,
+  "title": "Props",
+  "topics": [
+    "Passing props",
+    "Props destructuring",
+    "Default props",
+    "Children prop"
+  ],
+  "todos": [
+    {
+      "id": "d4-t1",
+      "title": "Learn: How props work",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d4-t2",
+      "title": "Pass props to components",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d4-t3",
+      "title": "Destructure props in function parameters",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d4-t4",
+      "title": "Use the children prop",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d4-t5",
+      "title": "Set default prop values",
+      "duration": 10,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Make your components reusable with props!",
+  "totalMinutes": 60,
+  "completed": false
+}

@@ -1,0 +1,45 @@
+{
+  "day": 13,
+  "title": "useRef and useContext",
+  "topics": [
+    "DOM refs with useRef",
+    "Mutable refs",
+    "Context API basics",
+    "useContext hook"
+  ],
+  "todos": [
+    {
+      "id": "d13-t1",
+      "title": "Learn: useRef for DOM access",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d13-t2",
+      "title": "Focus an input with ref",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d13-t3",
+      "title": "Learn: Context API pattern",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d13-t4",
+      "title": "Create a theme context",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d13-t5",
+      "title": "Consume context with useContext",
+      "duration": 10,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Avoid prop drilling with Context!",
+  "totalMinutes": 60,
+  "completed": false
+}

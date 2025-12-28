@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(dir:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run build:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(findstr:*)",
+      "Bash(del \"C:\\\\Users\\\\Anit\\\\Downloads\\\\OpenAnalyst Accountability coach\\\\ui\\\\app\\\\api\\\\chat\\\\stream\\\\route.ts\")",
+      "Bash(cat:*)",
+      "Bash(taskkill:*)",
+      "Bash(ls:*)",
+      "Bash(netstat:*)",
+      "Bash(xcopy:*)",
+      "Bash(robocopy:*)",
+      "Bash(xargs -I {} sh -c \"echo ''=== {} ==='' && head -30 ''{}''\")",
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}

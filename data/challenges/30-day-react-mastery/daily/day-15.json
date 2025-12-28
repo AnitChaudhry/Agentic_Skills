@@ -1,0 +1,44 @@
+{
+  "day": 15,
+  "title": "Component Lifecycle",
+  "topics": [
+    "Mounting, updating, unmounting",
+    "useEffect lifecycle mapping",
+    "Performance awareness"
+  ],
+  "todos": [
+    {
+      "id": "d15-t1",
+      "title": "Learn: Component lifecycle phases",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d15-t2",
+      "title": "Map lifecycle to useEffect",
+      "duration": 15,
+      "status": "pending"
+    },
+    {
+      "id": "d15-t3",
+      "title": "Debug re-renders",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d15-t4",
+      "title": "Identify performance issues",
+      "duration": 10,
+      "status": "pending"
+    },
+    {
+      "id": "d15-t5",
+      "title": "Practice with lifecycle logging",
+      "duration": 10,
+      "status": "pending"
+    }
+  ],
+  "quickWin": "Understand when and why components update!",
+  "totalMinutes": 60,
+  "completed": false
+}

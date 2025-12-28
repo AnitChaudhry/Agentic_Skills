@@ -1,0 +1,18 @@
+{
+  "id": "accountability-coach",
+  "name": "Accountability Coach",
+  "icon": "target",
+  "description": "Your personal accountability partner who helps you stay on track with your goals",
+  "skills": [
+    "streak",
+    "daily-checkin",
+    "motivation",
+    "punishment",
+    "challenge-onboarding",
+    "user-onboarding",
+    "schedule-replanner"
+  ],
+  "createdAt": "2025-01-01T00:00:00.000Z",
+  "updatedAt": "2025-01-01T00:00:00.000Z",
+  "isDefault": true
+}

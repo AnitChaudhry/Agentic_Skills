@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs/promises'
 import path from 'path'
-import { PATHS } from '@/lib/paths'
+import { PATHS, getProfilePaths } from '@/lib/paths'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const activeFile = path.join(PATHS.todos, 'active.json')
+    // Get active profile ID from header or query param
+    const { searchParams } = new URL(request.url)
+    const profileId = searchParams.get('profileId') || request.headers.get('X-Profile-Id')
+
+    // Use profile-specific path if profileId provided, otherwise fall back to legacy
+    const todosDir = profileId ? getProfilePaths(profileId).todos : PATHS.todos
+    const activeFile = path.join(todosDir, 'active.json')
 
     try {
       const data = await fs.readFile(activeFile, 'utf-8')
@@ -22,7 +28,13 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const todo = await request.json()
-    const todosDir = PATHS.todos
+
+    // Get active profile ID from header or query param
+    const { searchParams } = new URL(request.url)
+    const profileId = searchParams.get('profileId') || request.headers.get('X-Profile-Id')
+
+    // Use profile-specific path if profileId provided, otherwise fall back to legacy
+    const todosDir = profileId ? getProfilePaths(profileId).todos : PATHS.todos
     const activeFile = path.join(todosDir, 'active.json')
 
     await fs.mkdir(todosDir, { recursive: true })

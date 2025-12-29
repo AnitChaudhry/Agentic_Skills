@@ -21,6 +21,17 @@ export interface PendingRequest {
   chunks: string[]
 }
 
+// Streaming callback types
+export type StreamingCallback = (event: StreamingEvent) => void
+
+export interface StreamingEvent {
+  type: 'start' | 'chunk' | 'end' | 'error'
+  requestId: string
+  content?: string        // For 'chunk' events
+  fullContent?: string    // For 'end' events
+  error?: string          // For 'error' events
+}
+
 class WebSocketClient {
   private ws: WebSocket | null = null
   private url: string
@@ -30,6 +41,7 @@ class WebSocketClient {
   private messageHandlers: Set<MessageHandler> = new Set()
   private connectionHandlers: Set<ConnectionHandler> = new Set()
   private pendingRequests: Map<string, PendingRequest> = new Map()
+  private streamingCallbacks: Map<string, StreamingCallback> = new Map()
   private isConnecting = false
   private shouldReconnect = true
 
@@ -92,6 +104,16 @@ class WebSocketClient {
           this.isConnecting = false
           this.notifyConnectionHandlers(false)
 
+          // Notify streaming callbacks of disconnect
+          this.streamingCallbacks.forEach((callback, requestId) => {
+            callback({
+              type: 'error',
+              requestId,
+              error: 'Connection closed unexpectedly'
+            })
+          })
+          this.streamingCallbacks.clear()
+
           // Attempt to reconnect if not intentionally closed
           if (this.shouldReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
             this.scheduleReconnect()
@@ -116,6 +138,17 @@ class WebSocketClient {
   // Disconnect from WebSocket server
   disconnect(): void {
     this.shouldReconnect = false
+
+    // Notify all streaming callbacks of disconnect
+    this.streamingCallbacks.forEach((callback, requestId) => {
+      callback({
+        type: 'error',
+        requestId,
+        error: 'Connection lost during streaming'
+      })
+    })
+    this.streamingCallbacks.clear()
+
     if (this.ws) {
       this.ws.close(1000, 'Client disconnecting')
       this.ws = null
@@ -171,6 +204,52 @@ class WebSocketClient {
     })
   }
 
+  // Send message with streaming callback support
+  sendChatMessageStreaming(
+    agentId: string,
+    content: string,
+    onStream: StreamingCallback,
+    attachments?: string[]
+  ): { requestId: string; cancel: () => void } {
+    const requestId = `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+
+    // Register streaming callback
+    this.streamingCallbacks.set(requestId, onStream)
+
+    // Set a timeout
+    const timeout = setTimeout(() => {
+      if (this.streamingCallbacks.has(requestId)) {
+        this.streamingCallbacks.delete(requestId)
+        onStream({ type: 'error', requestId, error: 'Response timeout' })
+      }
+    }, 120000) // 2 minute timeout
+
+    // Send the message
+    try {
+      this.send({
+        type: 'chat',
+        agentId,
+        content,
+        requestId,
+        timestamp: new Date().toISOString(),
+        data: { attachments },
+      })
+    } catch (error) {
+      clearTimeout(timeout)
+      this.streamingCallbacks.delete(requestId)
+      onStream({ type: 'error', requestId, error: (error as Error).message })
+    }
+
+    // Return cancel function
+    return {
+      requestId,
+      cancel: () => {
+        clearTimeout(timeout)
+        this.streamingCallbacks.delete(requestId)
+      }
+    }
+  }
+
   // Handle incoming messages
   private handleMessage(message: WebSocketMessage): void {
     // Notify all registered handlers
@@ -185,11 +264,26 @@ class WebSocketClient {
       case 'response_start':
         // Claude Code is starting to respond
         console.log('[WebSocket] Response started for', message.requestId)
+        if (message.requestId) {
+          const callback = this.streamingCallbacks.get(message.requestId)
+          if (callback) {
+            callback({ type: 'start', requestId: message.requestId })
+          }
+        }
         break
 
       case 'response_chunk':
         // Streaming response chunk
         if (message.requestId) {
+          const callback = this.streamingCallbacks.get(message.requestId)
+          if (callback && message.content) {
+            callback({
+              type: 'chunk',
+              requestId: message.requestId,
+              content: message.content
+            })
+          }
+          // Still collect for pendingRequests (backward compatibility)
           const pending = this.pendingRequests.get(message.requestId)
           if (pending && message.content) {
             pending.chunks.push(message.content)
@@ -200,9 +294,20 @@ class WebSocketClient {
       case 'response_end':
         // Response complete
         if (message.requestId) {
+          const callback = this.streamingCallbacks.get(message.requestId)
+          if (callback) {
+            const fullContent = message.fullContent ||
+              this.pendingRequests.get(message.requestId)?.chunks.join('') || ''
+            callback({
+              type: 'end',
+              requestId: message.requestId,
+              fullContent
+            })
+            this.streamingCallbacks.delete(message.requestId)
+          }
+          // Handle pendingRequests (backward compatibility)
           const pending = this.pendingRequests.get(message.requestId)
           if (pending) {
-            // Use fullContent if provided, otherwise join chunks
             const fullResponse = message.fullContent || pending.chunks.join('')
             this.pendingRequests.delete(message.requestId)
             pending.resolve(fullResponse)
@@ -214,6 +319,16 @@ class WebSocketClient {
       case 'error':
         // Error response
         if (message.requestId) {
+          const callback = this.streamingCallbacks.get(message.requestId)
+          if (callback) {
+            callback({
+              type: 'error',
+              requestId: message.requestId,
+              error: message.content || 'Unknown error'
+            })
+            this.streamingCallbacks.delete(message.requestId)
+          }
+          // Handle pendingRequests (backward compatibility)
           const pending = this.pendingRequests.get(message.requestId)
           if (pending) {
             this.pendingRequests.delete(message.requestId)

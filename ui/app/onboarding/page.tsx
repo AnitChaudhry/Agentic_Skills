@@ -67,11 +67,18 @@ export default function OnboardingPage() {
     if (isLastQuestion) {
       // Save onboarding data
       try {
-        await fetch('/api/user/onboarding', {
+        const res = await fetch('/api/user/onboarding', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newAnswers),
         })
+        const data = await res.json()
+
+        // Set active profile ID in localStorage
+        if (data.userId) {
+          localStorage.setItem('activeProfileId', data.userId)
+        }
+
         router.push('/app')
       } catch (error) {
         console.error('Failed to save onboarding:', error)

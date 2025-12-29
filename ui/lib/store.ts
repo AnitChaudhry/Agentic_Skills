@@ -16,6 +16,43 @@ export const useNavigationStore = create<NavigationState>((set) => ({
   setActive: (type, id) => set({ activeType: type, activeId: id }),
 }))
 
+// Profile Store
+interface Profile {
+  id: string
+  name: string
+  email: string
+  created: string
+  lastActive: string
+  owner: boolean
+}
+
+interface ProfileState {
+  activeProfileId: string | null
+  profiles: Profile[]
+  setActiveProfile: (id: string) => void
+  loadProfiles: () => Promise<void>
+}
+
+export const useProfileStore = create<ProfileState>((set) => ({
+  activeProfileId: typeof window !== 'undefined' ? localStorage.getItem('activeProfileId') : null,
+  profiles: [],
+  setActiveProfile: (id) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('activeProfileId', id)
+    }
+    set({ activeProfileId: id })
+  },
+  loadProfiles: async () => {
+    try {
+      const response = await fetch('/api/profiles')
+      const data = await response.json()
+      set({ profiles: data.profiles || [] })
+    } catch (error) {
+      console.error('Failed to load profiles:', error)
+    }
+  },
+}))
+
 // Agent Store
 interface AgentState {
   agents: Agent[]
@@ -45,6 +82,7 @@ interface ChatState {
   isTyping: boolean
   setTyping: (isTyping: boolean) => void
   addMessage: (agentId: string, message: ChatMessage) => void
+  updateMessage: (agentId: string, messageId: string, updates: Partial<ChatMessage>) => void
   markMessageAnswered: (agentId: string, messageIndex: number) => void
   loadHistory: (agentId: string) => Promise<void>
   sendMessage: (agentId: string, content: string, attachments?: File[]) => Promise<void>
@@ -60,6 +98,30 @@ export const useChatStore = create<ChatState>((set, get) => ({
       messages: {
         ...messages,
         [agentId]: [...(messages[agentId] || []), message],
+      },
+    })
+  },
+  updateMessage: (agentId, messageId, updates) => {
+    const { messages } = get()
+    const agentMessages = messages[agentId] || []
+    const messageIndex = agentMessages.findIndex(m => m.id === messageId)
+
+    if (messageIndex === -1) return
+
+    const updatedMessages = [...agentMessages]
+    updatedMessages[messageIndex] = {
+      ...updatedMessages[messageIndex],
+      ...updates,
+      metadata: {
+        ...updatedMessages[messageIndex].metadata,
+        ...updates.metadata,
+      },
+    }
+
+    set({
+      messages: {
+        ...messages,
+        [agentId]: updatedMessages,
       },
     })
   },
@@ -120,62 +182,71 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const { getWebSocketClient } = await import('./websocket')
       const wsClient = getWebSocketClient()
 
-      // Show waiting indicator
-      set({ isTyping: true })
-
-      // Add a pending response message
-      const pendingMessageId = `pending-${Date.now()}`
+      // Create streaming message placeholder
+      const streamingMessageId = `streaming-${Date.now()}`
       get().addMessage(agentId, {
-        id: pendingMessageId,
+        id: streamingMessageId,
         role: 'assistant',
-        content: '💬 Waiting for response...',
+        content: '',  // Start empty
         timestamp: new Date().toISOString(),
         agentId,
-        metadata: { isPending: true },
+        metadata: {
+          isStreaming: true,
+          requestId: streamingMessageId,
+        },
       })
 
-      // Send via WebSocket and wait for response
-      try {
-        const response = await wsClient.sendChatMessage(agentId, content, attachments?.map(f => f.name))
+      set({ isTyping: true })
 
-        // Remove pending message and add real response
-        const messages = get().messages[agentId] || []
-        const filteredMessages = messages.filter(m => m.id !== pendingMessageId)
+      // Send with streaming callback
+      wsClient.sendChatMessageStreaming(
+        agentId,
+        content,
+        (event) => {
+          switch (event.type) {
+            case 'start':
+              // Stream started - message already exists
+              break
 
-        set({
-          messages: {
-            ...get().messages,
-            [agentId]: [...filteredMessages, {
-              id: `assistant-${Date.now()}`,
-              role: 'assistant',
-              content: response,
-              timestamp: new Date().toISOString(),
-              agentId,
-            }],
-          },
-          isTyping: false,
-        })
-      } catch (wsError: any) {
-        console.error('WebSocket send failed:', wsError)
+            case 'chunk':
+              // Append chunk to message content
+              const currentMessages = get().messages[agentId] || []
+              const streamingMsg = currentMessages.find(m => m.id === streamingMessageId)
+              if (streamingMsg && event.content) {
+                get().updateMessage(agentId, streamingMessageId, {
+                  content: streamingMsg.content + event.content,
+                })
+              }
+              break
 
-        // Remove pending message
-        const messages = get().messages[agentId] || []
-        const filteredMessages = messages.filter(m => m.id !== pendingMessageId)
+            case 'end':
+              // Streaming complete
+              get().updateMessage(agentId, streamingMessageId, {
+                content: event.fullContent || '',
+                metadata: {
+                  isStreaming: false,
+                  requestId: undefined,
+                },
+              })
+              set({ isTyping: false })
+              break
 
-        set({
-          messages: {
-            ...get().messages,
-            [agentId]: [...filteredMessages, {
-              id: `error-${Date.now()}`,
-              role: 'assistant',
-              content: '❌ Failed to get response. Make sure Claude Code listener is running.',
-              timestamp: new Date().toISOString(),
-              agentId,
-            }],
-          },
-          isTyping: false,
-        })
-      }
+            case 'error':
+              // Handle error
+              get().updateMessage(agentId, streamingMessageId, {
+                content: `❌ Error: ${event.error || 'Failed to get response'}`,
+                metadata: {
+                  isStreaming: false,
+                  streamingError: event.error,
+                },
+              })
+              set({ isTyping: false })
+              break
+          }
+        },
+        attachments?.map(f => f.name)
+      )
+
     } catch (error) {
       console.error('Failed to send message:', error)
       set({ isTyping: false })

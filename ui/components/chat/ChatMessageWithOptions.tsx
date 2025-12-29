@@ -14,6 +14,7 @@ export function ChatMessageWithOptions({
   onOptionSelect,
 }: ChatMessageWithOptionsProps) {
   const { metadata, role, content, attachments } = message
+  const isStreaming = metadata?.isStreaming
 
   return (
     <div
@@ -26,8 +27,24 @@ export function ChatMessageWithOptions({
             : 'bg-oa-bg-secondary border border-oa-border text-oa-text-primary rounded-bl-sm'
         }`}
       >
+        {/* Show generating message if streaming and empty */}
+        {isStreaming && !content && (
+          <div className="flex items-center gap-2 text-xs text-oa-text-secondary">
+            <div className="w-2 h-2 bg-oa-accent rounded-full animate-pulse" />
+            <span>Generating response...</span>
+          </div>
+        )}
+
         {/* Message content */}
-        <div className="text-sm whitespace-pre-wrap">{content}</div>
+        {content && (
+          <div className="text-sm whitespace-pre-wrap">
+            {content}
+            {/* Streaming cursor indicator */}
+            {isStreaming && (
+              <span className="inline-block w-2 h-4 ml-1 bg-oa-accent animate-pulse" />
+            )}
+          </div>
+        )}
 
         {/* Attachments */}
         {attachments && attachments.length > 0 && (

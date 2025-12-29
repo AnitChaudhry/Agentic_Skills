@@ -271,8 +271,8 @@ ${firstStep.getMessage({})}`
             />
           ))}
 
-          {/* Typing indicator */}
-          {isTyping && (
+          {/* Typing indicator - only show when no streaming message exists */}
+          {isTyping && !currentMessages.some(m => m.metadata?.isStreaming) && (
             <div className="flex justify-start">
               <div className="max-w-[80%] px-4 py-3 bg-oa-bg-secondary border border-oa-border rounded-2xl rounded-bl-sm">
                 <div className="flex items-center gap-1">

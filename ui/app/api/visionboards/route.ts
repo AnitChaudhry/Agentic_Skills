@@ -2,14 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs/promises'
 import path from 'path'
 import type { VisionBoard } from '@/types/visionboard'
-import { PATHS } from '@/lib/paths'
+import { PATHS, getProfilePaths } from '@/lib/paths'
 
-const getVisionBoardsDir = () => PATHS.visionboards
+const getVisionBoardsDir = (profileId?: string | null) => {
+  return profileId ? getProfilePaths(profileId).visionboards : PATHS.visionboards
+}
 
 // GET - List all vision boards
 export async function GET(request: NextRequest) {
   try {
-    const visionboardsDir = getVisionBoardsDir()
+    // Get active profile ID from header or query param
+    const { searchParams } = new URL(request.url)
+    const profileId = searchParams.get('profileId') || request.headers.get('X-Profile-Id')
+
+    const visionboardsDir = getVisionBoardsDir(profileId)
 
     // Ensure directory exists
     await fs.mkdir(visionboardsDir, { recursive: true })
@@ -45,7 +51,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const newBoard: VisionBoard = await request.json()
-    const visionboardsDir = getVisionBoardsDir()
+
+    // Get active profile ID from header or query param
+    const { searchParams } = new URL(request.url)
+    const profileId = searchParams.get('profileId') || request.headers.get('X-Profile-Id')
+
+    const visionboardsDir = getVisionBoardsDir(profileId)
 
     // Ensure directory exists
     await fs.mkdir(visionboardsDir, { recursive: true })

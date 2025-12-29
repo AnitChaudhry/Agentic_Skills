@@ -184,6 +184,36 @@ export default function SettingsPage() {
           </div>
         </Section>
 
+        {/* Profile Management Section */}
+        <Section
+          title="Profile Management"
+          icon={<User className="w-5 h-5" />}
+          isExpanded={expandedSections.profileManagement || false}
+          onToggle={() => toggleSection('profileManagement')}
+        >
+          <div className="space-y-4">
+            <div className="bg-oa-bg-secondary p-4 rounded-lg border border-oa-border">
+              <p className="text-sm text-oa-text-secondary mb-4">
+                Switch between profiles or manage existing profiles. Each profile has its own challenges, todos, and workspace.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => window.location.href = '/profiles'}
+                  className="px-6 py-2 bg-oa-accent text-white rounded-lg hover:bg-oa-accent-hover transition-colors"
+                >
+                  Switch Profile
+                </button>
+                <button
+                  onClick={() => window.location.href = '/onboarding'}
+                  className="px-6 py-2 border border-oa-border text-oa-text-primary rounded-lg hover:bg-oa-bg-tertiary transition-colors"
+                >
+                  Create New Profile
+                </button>
+              </div>
+            </div>
+          </div>
+        </Section>
+
         {/* Onboarding Data (Read-only) */}
         <Section
           title="Onboarding Data"

@@ -1,7 +1,9 @@
 # User Profile
 
-- **Name:** Anit 
-- **Timezone:** NewYour
+- **Name:** Anit
+- **Email:** anit@example.com
+- **User ID:** anit-example-com
+- **Timezone:** NewYork
 - **Created:** 2025-12-28
 - **Onboarding Completed:** true
 

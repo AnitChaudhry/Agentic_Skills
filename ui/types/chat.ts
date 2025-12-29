@@ -14,6 +14,11 @@ export interface ChatMessageMetadata {
   inputType?: 'text' | 'date' | 'number' | 'select' | 'multi-select' | 'none'
   answered?: boolean
   isFirstTime?: boolean
+  isPending?: boolean
+  // Streaming properties
+  isStreaming?: boolean       // True while chunks are arriving
+  streamingError?: string     // Error message if streaming fails
+  requestId?: string          // Track which request this message belongs to
   [key: string]: any  // Allow additional properties
 }
 

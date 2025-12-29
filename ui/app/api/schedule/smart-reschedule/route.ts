@@ -1,9 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs/promises'
 import path from 'path'
-import { DATA_DIR, PATHS } from '@/lib/paths'
+import { DATA_DIR, PATHS, getProfilePaths } from '@/lib/paths'
 
-const EVENTS_FILE = path.join(DATA_DIR, 'schedule', 'events.json')
+const getEventsFile = (profileId?: string | null) => {
+  const scheduleDir = profileId
+    ? getProfilePaths(profileId).schedule
+    : path.join(DATA_DIR, 'schedule')
+  return path.join(scheduleDir, 'events.json')
+}
+
+const getHistoryDir = (profileId?: string | null) => {
+  const scheduleDir = profileId
+    ? getProfilePaths(profileId).schedule
+    : path.join(DATA_DIR, 'schedule')
+  return path.join(scheduleDir, 'history')
+}
 
 interface CalendarEvent {
   id: string
@@ -59,6 +71,7 @@ export async function GET(request: NextRequest) {
     const time = searchParams.get('time')
     const duration = parseInt(searchParams.get('duration') || '30')
     const excludeId = searchParams.get('excludeId')
+    const profileId = searchParams.get('profileId') || request.headers.get('X-Profile-Id')
 
     if (!date || !time) {
       return NextResponse.json(
@@ -66,6 +79,8 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    const EVENTS_FILE = getEventsFile(profileId)
 
     // Read events from schedule
     let events: CalendarEvent[] = []
@@ -178,6 +193,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { todoId, newDate, newTime, reason, conflictResolution } = body
 
+    // Get active profile ID
+    const { searchParams } = new URL(request.url)
+    const profileId = searchParams.get('profileId') || request.headers.get('X-Profile-Id')
+
     if (!todoId || !newDate || !newTime) {
       return NextResponse.json(
         { error: 'todoId, newDate, and newTime are required' },
@@ -185,11 +204,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const EVENTS_FILE = getEventsFile(profileId)
+    const historyDir = getHistoryDir(profileId)
+
     // Track what was changed for the response
     const changes: Array<{ id: string; from: string; to: string }> = []
 
     // 1. Update in todos/active.json
-    const activeFile = path.join(PATHS.todos, 'active.json')
+    const todosDir = profileId ? getProfilePaths(profileId).todos : PATHS.todos
+    const activeFile = path.join(todosDir, 'active.json')
     let todos: Todo[] = []
     try {
       const content = await fs.readFile(activeFile, 'utf-8')
@@ -306,7 +329,6 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Save to history
-    const historyDir = path.join(DATA_DIR, 'schedule', 'history')
     await fs.mkdir(historyDir, { recursive: true })
     const historyFile = path.join(historyDir, `${new Date().toISOString().split('T')[0]}.json`)
 

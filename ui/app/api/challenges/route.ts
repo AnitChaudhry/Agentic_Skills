@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs/promises'
 import path from 'path'
-import { DATA_DIR, PATHS } from '@/lib/paths'
+import { DATA_DIR, PATHS, getProfilePaths } from '@/lib/paths'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const challengesDir = PATHS.challenges
+    // Get active profile ID from header or query param
+    const { searchParams } = new URL(request.url)
+    const profileId = searchParams.get('profileId') || request.headers.get('X-Profile-Id')
+
+    // Use profile-specific path if profileId provided, otherwise fall back to legacy
+    const challengesDir = profileId
+      ? getProfilePaths(profileId).challenges
+      : PATHS.challenges
 
     // Ensure directory exists
     await fs.mkdir(challengesDir, { recursive: true })
@@ -90,7 +97,14 @@ export async function POST(request: NextRequest) {
       gracePeriod,
     } = body
 
-    const challengesDir = PATHS.challenges
+    // Get active profile ID from header or query param
+    const { searchParams } = new URL(request.url)
+    const profileId = searchParams.get('profileId') || request.headers.get('X-Profile-Id')
+
+    // Use profile-specific path if profileId provided, otherwise fall back to legacy
+    const challengesDir = profileId
+      ? getProfilePaths(profileId).challenges
+      : PATHS.challenges
     const challengeDir = path.join(challengesDir, id)
 
     // Create challenge directory

@@ -11,6 +11,7 @@ export function useInitialization() {
   const router = useRouter()
   const [steps, setSteps] = useState<InitStep[]>([
     { id: 'env', label: 'Setting up environment', status: 'pending' },
+    { id: 'profiles', label: 'Checking profiles', status: 'pending' },
     { id: 'onboarding', label: 'Checking user status', status: 'pending' },
     { id: 'agents', label: 'Loading agents', status: 'pending' },
     { id: 'workspace', label: 'Reading workspace files', status: 'pending' },
@@ -32,24 +33,41 @@ export function useInitialization() {
         await new Promise((resolve) => setTimeout(resolve, 500))
         updateStep('env', 'complete')
 
-        // Step 2: Check onboarding status
-        updateStep('onboarding', 'loading')
+        // Step 2: Check for profiles
+        updateStep('profiles', 'loading')
         try {
-          const response = await fetch('/api/user/status')
-          const data = await response.json()
+          const profilesRes = await fetch('/api/profiles')
+          const profilesData = await profilesRes.json()
+          const profiles = profilesData.profiles || []
 
-          if (!data.hasCompletedOnboarding) {
-            updateStep('onboarding', 'complete')
+          // No profiles exist - redirect to onboarding
+          if (profiles.length === 0) {
+            updateStep('profiles', 'complete')
             router.push('/onboarding')
             return
           }
-          updateStep('onboarding', 'complete')
+
+          // Check if active profile is set
+          const activeProfileId = localStorage.getItem('activeProfileId')
+
+          if (!activeProfileId) {
+            // No active profile - redirect to profile selector
+            updateStep('profiles', 'complete')
+            router.push('/profiles')
+            return
+          }
+
+          updateStep('profiles', 'complete')
         } catch (error) {
-          // If API fails, assume first time user
-          updateStep('onboarding', 'complete')
+          console.error('Failed to check profiles:', error)
+          updateStep('profiles', 'complete')
           router.push('/onboarding')
           return
         }
+
+        // Step 3: Check onboarding status (kept for backward compat)
+        updateStep('onboarding', 'loading')
+        updateStep('onboarding', 'complete')
 
         // Step 3: Load agents
         updateStep('agents', 'loading')

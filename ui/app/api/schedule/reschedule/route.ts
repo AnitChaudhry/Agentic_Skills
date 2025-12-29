@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs/promises'
 import path from 'path'
-import { DATA_DIR, PATHS } from '@/lib/paths'
+import { DATA_DIR, PATHS, getProfilePaths } from '@/lib/paths'
 
-const EVENTS_FILE = path.join(DATA_DIR, 'schedule', 'events.json')
+const getEventsFile = (profileId?: string | null) => {
+  const scheduleDir = profileId
+    ? getProfilePaths(profileId).schedule
+    : path.join(DATA_DIR, 'schedule')
+  return path.join(scheduleDir, 'events.json')
+}
 
 interface CalendarEvent {
   id: string
@@ -23,12 +28,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { eventId, newDate, newTime, reason } = body
 
+    // Get active profile ID
+    const { searchParams } = new URL(request.url)
+    const profileId = searchParams.get('profileId') || request.headers.get('X-Profile-Id')
+
     if (!eventId || !newDate || !newTime) {
       return NextResponse.json(
         { error: 'eventId, newDate, and newTime are required' },
         { status: 400 }
       )
     }
+
+    const EVENTS_FILE = getEventsFile(profileId)
 
     // Ensure schedule directory exists
     await fs.mkdir(path.dirname(EVENTS_FILE), { recursive: true })
@@ -103,6 +114,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const eventId = searchParams.get('eventId')
     const date = searchParams.get('date')
+    const profileId = searchParams.get('profileId') || request.headers.get('X-Profile-Id')
 
     if (!eventId) {
       return NextResponse.json(
@@ -110,6 +122,8 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    const EVENTS_FILE = getEventsFile(profileId)
 
     // Read events
     let events: CalendarEvent[] = []

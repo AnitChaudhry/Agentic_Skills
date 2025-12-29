@@ -37,15 +37,18 @@ export default function SettingsPage() {
 
   const loadAllData = async () => {
     try {
-      // Load profile
-      const profileRes = await fetch('/api/user/profile')
+      // Get active profile ID from localStorage
+      const activeProfileId = typeof window !== 'undefined' ? localStorage.getItem('activeProfileId') : null
+
+      // Load profile using status API with profileId
+      const profileRes = await fetch(`/api/user/status${activeProfileId ? `?profileId=${activeProfileId}` : ''}`)
       const profileData = await profileRes.json()
-      if (profileData.profile) {
+      if (profileData.user) {
         setProfile({
-          name: profileData.profile.name || '',
-          email: profileData.profile.email || '',
-          timezone: profileData.profile.timezone || '',
-          photo: profileData.profile.photo || '',
+          name: profileData.user.name || '',
+          email: profileData.user.email || '',
+          timezone: profileData.user.timezone || '',
+          photo: '',
         })
       }
 

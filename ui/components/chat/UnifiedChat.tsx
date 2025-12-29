@@ -10,6 +10,7 @@ import { ChatMessageWithOptions } from './ChatMessageWithOptions'
 import { isOnboardingRequired, loadUserContext, generateContextualOpening } from '@/lib/adaptiveOnboarding'
 import { getNextStep, getFirstStep } from '@/lib/onboardingStateMachine'
 import type { Agent } from '@/types'
+import { addProfileId, useProfileId, getProfileHeaders } from '@/lib/useProfileId'
 
 interface UnifiedChatProps {
   agent?: Agent
@@ -25,6 +26,7 @@ export function UnifiedChat({ agent, onCheckinClick, onCreateSkillClick }: Unifi
   const [showGreeting, setShowGreeting] = useState(true)
   const [onboardingInitialized, setOnboardingInitialized] = useState(false)
   const searchParams = useSearchParams()
+  const profileId = useProfileId()
 
   const agentId = agent?.id || 'unified'
   const currentMessages = messages[agentId] || []
@@ -173,9 +175,10 @@ ${firstStep.getMessage({})}`
         }
 
         // Create the challenge from responses
-        await fetch('/api/challenges', {
+        const url = addProfileId('/api/challenges', profileId)
+        await fetch(url, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getProfileHeaders(profileId),
           body: JSON.stringify({
             name: allResponses.challenge_name || allResponses.goal,
             type: allResponses.challenge_type || 'custom',

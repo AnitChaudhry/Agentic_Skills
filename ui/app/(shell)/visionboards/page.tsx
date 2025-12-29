@@ -6,6 +6,7 @@ import { Plus, Sparkles, Eye, Trash2 } from 'lucide-react'
 import { VisionBoardWizard, VisionBoardViewer } from '@/components/visionboard'
 import { useAgentStore } from '@/lib/store'
 import type { VisionBoard } from '@/types/visionboard'
+import { addProfileId, useProfileId, getProfileHeaders } from '@/lib/useProfileId'
 
 export default function VisionBoardsPage() {
   const [visionboards, setVisionboards] = useState<VisionBoard[]>([])
@@ -14,15 +15,17 @@ export default function VisionBoardsPage() {
   const [selectedBoard, setSelectedBoard] = useState<VisionBoard | null>(null)
   const { activeAgentId, agents } = useAgentStore()
   const selectedAgent = agents.find(a => a.id === activeAgentId)
+  const profileId = useProfileId()
 
   useEffect(() => {
     loadVisionBoards()
-  }, [])
+  }, [profileId])
 
   const loadVisionBoards = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('/api/visionboards')
+      const url = addProfileId('/api/visionboards', profileId)
+      const response = await fetch(url)
       const data = await response.json()
       setVisionboards(data.visionboards || [])
     } catch (error) {
@@ -34,9 +37,10 @@ export default function VisionBoardsPage() {
 
   const handleCreateVisionBoard = async (visionboard: VisionBoard) => {
     try {
-      const response = await fetch('/api/visionboards', {
+      const url = addProfileId('/api/visionboards', profileId)
+      const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getProfileHeaders(profileId),
         body: JSON.stringify(visionboard),
       })
 

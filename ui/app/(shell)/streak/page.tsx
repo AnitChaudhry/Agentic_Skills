@@ -6,19 +6,22 @@ import { motion } from 'framer-motion'
 import { Flame, Trophy, Calendar, TrendingUp } from 'lucide-react'
 import { AnimatedButton } from '@/components/ui/AnimatedButton'
 import type { Challenge } from '@/types/streak'
+import { addProfileId, useProfileId } from '@/lib/useProfileId'
 
 export default function StreakPage() {
   const router = useRouter()
   const [challenges, setChallenges] = useState<Challenge[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const profileId = useProfileId()
 
   useEffect(() => {
     loadChallenges()
-  }, [])
+  }, [profileId])
 
   const loadChallenges = async () => {
     try {
-      const res = await fetch('/api/challenges')
+      const url = addProfileId('/api/challenges', profileId)
+      const res = await fetch(url)
       const data = await res.json()
       setChallenges(data.challenges || [])
     } catch (error) {

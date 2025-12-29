@@ -2,6 +2,13 @@
 
 import { create } from 'zustand'
 import type { Agent, ChatMessage, FileNode, Todo, Challenge } from '@/types'
+import { addProfileId } from './useProfileId'
+
+// Helper to get active profileId
+const getActiveProfileId = (): string | null => {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem('activeProfileId')
+}
 
 // Navigation Store - Track active selection (agent OR nav item)
 interface NavigationState {
@@ -333,7 +340,9 @@ export const useTodoStore = create<TodoState>((set) => ({
   todos: [],
   loadTodos: async () => {
     try {
-      const response = await fetch('/api/todos')
+      const profileId = getActiveProfileId()
+      const url = addProfileId('/api/todos', profileId)
+      const response = await fetch(url)
       const todos = await response.json()
       set({ todos })
     } catch (error) {
@@ -342,7 +351,9 @@ export const useTodoStore = create<TodoState>((set) => ({
   },
   addTodo: async (todo) => {
     try {
-      const response = await fetch('/api/todos', {
+      const profileId = getActiveProfileId()
+      const url = addProfileId('/api/todos', profileId)
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(todo),
@@ -379,7 +390,9 @@ export const useChallengeStore = create<ChallengeState>((set) => ({
   challenges: [],
   loadChallenges: async () => {
     try {
-      const response = await fetch('/api/challenges')
+      const profileId = getActiveProfileId()
+      const url = addProfileId('/api/challenges', profileId)
+      const response = await fetch(url)
       const data = await response.json()
       // API returns { challenges: [...] }, extract the array
       set({ challenges: data.challenges || [] })
@@ -450,7 +463,9 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
         })
       } else if (type === 'challenge') {
         // Create challenge
-        await fetch('/api/challenges', {
+        const profileId = getActiveProfileId()
+        const url = addProfileId('/api/challenges', profileId)
+        await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(responses),

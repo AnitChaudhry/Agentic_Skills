@@ -1,8 +1,14 @@
 # Profiles Registry
 
 ## Owner Profile
-- **ID:** None
+- **ID:** anit-gmail-co
 
 ## All Profiles
 
-<!-- Profiles will be added here when users complete onboarding -->
+### anit-gmail-co
+- **Name:** Anit
+- **Email:** anit@gmail.co
+- **Created:** 2025-12-29
+- **Last Active:** 2025-12-29
+- **Owner:** true
+

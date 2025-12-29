@@ -51,13 +51,20 @@ export function useInitialization() {
           const activeProfileId = localStorage.getItem('activeProfileId')
 
           if (!activeProfileId) {
-            // No active profile - redirect to profile selector
+            // If only one profile exists, auto-select it
+            if (profiles.length === 1) {
+              localStorage.setItem('activeProfileId', profiles[0].id)
+              updateStep('profiles', 'complete')
+              // Continue to app with auto-selected profile
+            } else {
+              // Multiple profiles - redirect to profile selector
+              updateStep('profiles', 'complete')
+              router.push('/profiles')
+              return
+            }
+          } else {
             updateStep('profiles', 'complete')
-            router.push('/profiles')
-            return
           }
-
-          updateStep('profiles', 'complete')
         } catch (error) {
           console.error('Failed to check profiles:', error)
           updateStep('profiles', 'complete')
@@ -87,10 +94,12 @@ export function useInitialization() {
         // Step 5: Load configurations
         updateStep('config', 'loading')
         try {
+          const activeProfileId = localStorage.getItem('activeProfileId')
+          const profileParam = activeProfileId ? `?profileId=${activeProfileId}` : ''
           await Promise.all([
-            fetch('/api/user/profile'),
-            fetch('/api/todos'),
-            fetch('/api/challenges'),
+            fetch(`/api/user/status${profileParam}`),
+            fetch(`/api/todos${profileParam}`),
+            fetch(`/api/challenges${profileParam}`),
           ])
           updateStep('config', 'complete')
         } catch (error) {

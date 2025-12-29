@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { X, AlertTriangle, Calendar, Clock, ArrowRight, Layers, GitMerge } from 'lucide-react'
+import { addProfileId, useProfileId, getProfileHeaders } from '@/lib/useProfileId'
 
 interface Session {
   id: string
@@ -50,6 +51,7 @@ export default function RescheduleModal({ session, onClose, onReschedule }: Resc
   const [isCheckingConflicts, setIsCheckingConflicts] = useState(false)
   const [conflictResolution, setConflictResolution] = useState<ConflictResolution | null>(null)
   const [showConflictOptions, setShowConflictOptions] = useState(false)
+  const profileId = useProfileId()
 
   // Check for conflicts when date/time changes
   useEffect(() => {
@@ -90,9 +92,10 @@ export default function RescheduleModal({ session, onClose, onReschedule }: Resc
     setIsSubmitting(true)
 
     try {
-      await fetch('/api/schedule/smart-reschedule', {
+      const url = addProfileId('/api/schedule/smart-reschedule', profileId)
+      await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getProfileHeaders(profileId),
         body: JSON.stringify({
           todoId: session.id,
           newDate,

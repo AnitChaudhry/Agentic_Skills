@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, CheckCircle2, Circle, Clock, Calendar, TrendingUp } from 'lucide-react'
 import { AnimatedButton } from '../ui/AnimatedButton'
+import { addProfileId, useProfileId } from '@/lib/useProfileId'
 
 interface Todo {
   id: string
@@ -32,6 +33,7 @@ export function DailyCheckIn({ isOpen, onClose, agentId }: DailyCheckInProps) {
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const profileId = useProfileId()
 
   // Load incomplete tasks based on current time
   useEffect(() => {
@@ -48,7 +50,8 @@ export function DailyCheckIn({ isOpen, onClose, agentId }: DailyCheckInProps) {
       const today = now.toISOString().split('T')[0]
 
       // Fetch all incomplete todos for today
-      const response = await fetch('/api/todos')
+      const url = addProfileId('/api/todos', profileId)
+      const response = await fetch(url)
       const data = await response.json()
 
       // Filter tasks for today that are incomplete

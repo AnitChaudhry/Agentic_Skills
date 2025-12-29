@@ -6,6 +6,7 @@ import type { Agent } from '@/types'
 import type { Skill } from '@/types/skill'
 import { Button } from '@/components/ui'
 import { Plus, X, CheckCircle, Circle, Clock, Target, Activity } from 'lucide-react'
+import { addProfileId, useProfileId } from '@/lib/useProfileId'
 
 interface CapabilitiesProps {
   agent: Agent
@@ -21,6 +22,7 @@ export function Capabilities({ agent, onActionClick }: CapabilitiesProps) {
   const [recentCompletions, setRecentCompletions] = useState<any[]>([])
   const [previousActivities, setPreviousActivities] = useState<any[]>([])
   const [lastCheckin, setLastCheckin] = useState<any>(null)
+  const profileId = useProfileId()
 
   useEffect(() => {
     loadActiveSkills()
@@ -29,7 +31,7 @@ export function Capabilities({ agent, onActionClick }: CapabilitiesProps) {
     loadRecentCompletions()
     loadPreviousActivities()
     loadLastCheckin()
-  }, [agent.id, agent.skills])
+  }, [agent.id, agent.skills, profileId])
 
   const loadActiveSkills = async () => {
     try {
@@ -63,7 +65,8 @@ export function Capabilities({ agent, onActionClick }: CapabilitiesProps) {
 
   const loadTodos = async () => {
     try {
-      const res = await fetch('/api/todos')
+      const url = addProfileId('/api/todos', profileId)
+      const res = await fetch(url)
       const data = await res.json()
       const today = new Date().toISOString().split('T')[0]
       const relevantTodos = data.todos?.filter((todo: any) => {
@@ -78,7 +81,8 @@ export function Capabilities({ agent, onActionClick }: CapabilitiesProps) {
 
   const loadCurrentTask = async () => {
     try {
-      const res = await fetch('/api/todos')
+      const url = addProfileId('/api/todos', profileId)
+      const res = await fetch(url)
       const data = await res.json()
       const today = new Date().toISOString().split('T')[0]
       const todayTask = data.todos?.find((todo: any) => {
@@ -93,7 +97,8 @@ export function Capabilities({ agent, onActionClick }: CapabilitiesProps) {
 
   const loadRecentCompletions = async () => {
     try {
-      const res = await fetch('/api/todos')
+      const url = addProfileId('/api/todos', profileId)
+      const res = await fetch(url)
       const data = await res.json()
       const completed = data.todos?.filter((todo: any) => todo.completed)
         .sort((a: any, b: any) => new Date(b.completedAt || b.date).getTime() - new Date(a.completedAt || a.date).getTime())
@@ -119,7 +124,8 @@ export function Capabilities({ agent, onActionClick }: CapabilitiesProps) {
 
   const loadLastCheckin = async () => {
     try {
-      const res = await fetch('/api/challenges')
+      const url = addProfileId('/api/challenges', profileId)
+      const res = await fetch(url)
       const data = await res.json()
       if (data.challenges && data.challenges.length > 0) {
         const latestCheckIns = data.challenges

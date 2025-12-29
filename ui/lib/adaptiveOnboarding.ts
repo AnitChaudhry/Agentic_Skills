@@ -5,6 +5,7 @@
  */
 
 import type { Challenge } from '@/types/streak'
+import { addProfileId } from './useProfileId'
 
 interface UserContext {
   hasResolution: boolean
@@ -57,7 +58,9 @@ export async function loadUserContext(): Promise<UserContext> {
     let totalDailyHours = 0
 
     try {
-      const challengesRes = await fetch('/api/challenges')
+      const profileId = typeof window !== 'undefined' ? localStorage.getItem('activeProfileId') : null
+      const url = addProfileId('/api/challenges', profileId)
+      const challengesRes = await fetch(url)
       if (challengesRes.ok) {
         const challengesData = await challengesRes.json()
         existingChallenges = (challengesData.challenges || []).map((c: any) => ({
@@ -198,7 +201,9 @@ export function getRecommendedHours(context: UserContext): string[] {
  */
 export async function isOnboardingRequired(): Promise<boolean> {
   try {
-    const res = await fetch('/api/challenges')
+    const profileId = typeof window !== 'undefined' ? localStorage.getItem('activeProfileId') : null
+    const url = addProfileId('/api/challenges', profileId)
+    const res = await fetch(url)
     if (!res.ok) return true
 
     const data = await res.json()

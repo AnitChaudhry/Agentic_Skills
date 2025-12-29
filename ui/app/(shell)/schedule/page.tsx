@@ -2,22 +2,26 @@
 
 import React, { useState, useEffect } from 'react'
 import { CalendarEnhanced } from '@/components/schedule/CalendarEnhanced'
+import { addProfileId, useProfileId } from '@/lib/useProfileId'
 
 export default function SchedulePage() {
   const [events, setEvents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const profileId = useProfileId()
 
   useEffect(() => {
     loadEvents()
-  }, [])
+  }, [profileId])
 
   const loadEvents = async () => {
     try {
       setLoading(true)
       // Load todos and challenges to populate calendar
+      const todosUrl = addProfileId('/api/todos', profileId)
+      const challengesUrl = addProfileId('/api/challenges', profileId)
       const [todosRes, challengesRes] = await Promise.all([
-        fetch('/api/todos'),
-        fetch('/api/challenges'),
+        fetch(todosUrl),
+        fetch(challengesUrl),
       ])
 
       const todosData = await todosRes.json()

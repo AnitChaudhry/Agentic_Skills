@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { CheckCircle2, Circle, Sparkles, Check, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import type { Agent } from '@/types'
+import { addProfileId, useProfileId } from '@/lib/useProfileId'
 
 interface QuickActionsPanelProps {
   agent?: Agent
@@ -24,14 +25,16 @@ export function QuickActionsPanel({ agent, onCheckinClick, onCreateSkillClick }:
   const [loading, setLoading] = useState(true)
   const [completingId, setCompletingId] = useState<string | null>(null)
   const [completedNotification, setCompletedNotification] = useState<string | null>(null)
+  const profileId = useProfileId()
 
   useEffect(() => {
     loadTodos()
-  }, [])
+  }, [profileId])
 
   const loadTodos = async () => {
     try {
-      const response = await fetch('/api/todos')
+      const url = addProfileId('/api/todos', profileId)
+      const response = await fetch(url)
       const allTodos = await response.json()
 
       // Filter to pending todos only (use 'completed' boolean)

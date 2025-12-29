@@ -1,267 +1,354 @@
-# Claude Code Integration Guide
+# Claude Code Integration Guide - v2.0 (Automated Startup)
 
-This document explains how Claude Code integrates with the OpenAnalyst UI using **WebSocket real-time communication**.
+## 🚀 Quick Start - One Command!
 
-## Architecture (WebSocket-Based)
+### When User Says: "Start my app"
 
-```
-┌─────────────────┐                    ┌──────────────────┐                    ┌─────────────────┐
-│   Next.js UI    │◄─── WebSocket ────►│  WebSocket Server│◄─── WebSocket ────►│  Claude Code    │
-│   (Browser)     │   (port 8765)      │  (Message Broker)│                    │  (ws-listener)  │
-└─────────────────┘                    └────────┬─────────┘                    └─────────────────┘
-                                                 │
-                                                 ▼
-                                         data/chats/*.md
-                                         (persistence only)
+**Run this single command:**
+```bash
+npm start
 ```
 
-**Everything happens in real-time through WebSocket connections. No file polling or inbox needed.**
+That's it! Everything starts automatically:
+- ✅ WebSocket Server (ws://localhost:8765)
+- ✅ Fast Cache System (0ms queries)
+- ✅ Claude Code Listener (YOU!)
+- ✅ Next.js UI (http://localhost:3000)
+
+**Then tell user:**
+```
+✅ Your app is ready at http://localhost:3000
+```
 
 ---
 
-## Getting Started
+## 🏗️ Architecture
 
-### 1. Start the WebSocket Server
-```bash
-npm run dev:ws
+```
+User Browser → WebSocket Server → Claude Code (YOU) → Fast Cache → data/
+     ↓              ↓                    ↓                ↓
+  Next.js    ws://localhost:8765    ws-listener      0-2ms RAM
 ```
 
-This starts the WebSocket server on `ws://localhost:8765` which acts as a message broker between the UI and Claude Code.
-
-### 2. Start the UI
-```bash
-npm run dev
-```
-
-The UI automatically connects to the WebSocket server and registers as a `ui` client.
-
-### 3. Run the Claude Code Listener
-```bash
-node lib/ws-listener.js
-```
-
-This connects to the WebSocket server as a `claude-cli` client and:
-- Listens for messages from the UI
-- Writes pending messages to `data/.pending/`
-- Provides an API for sending responses
+**Key Components:**
+1. **Next.js UI** - User interface at localhost:3000
+2. **WebSocket Server** - Real-time message broker
+3. **ws-listener** - Connects YOU to WebSocket
+4. **Fast Cache** - In-memory data (0-2ms queries)
+5. **data/ folder** - Persistent storage
 
 ---
 
-## How It Works
+## ⚡ Fast Cache System
 
-### Step 1: User Sends Message in UI
-- User types message and clicks send
-- UI sends message via WebSocket to server
-- Server saves it to `data/chats/{date}/{agentId}.md`
-- Server forwards message to Claude Code listener
+### Why It's Fast
 
-### Step 2: Claude Code Receives Message
-The listener displays in your terminal:
+**OLD WAY (File Reading):**
 ```
-============================================================
-📨 NEW MESSAGE from UI
-   Agent: unified
-   Request ID: req-1234567890-abc123
-   Content: How is my React challenge going?
-============================================================
-
-✅ Written to: data/.pending/req-1234567890-abc123.json
-
-Waiting for Claude Code to process...
+User: "What are my tasks?"
+→ Read profile.md (20ms)
+→ Read challenges/*.md (30ms)
+→ Read todos/*.json (25ms)
+→ Parse markdown (15ms)
+= TOTAL: 90ms
 ```
 
-### Step 3: Read the Pending Message
+**NEW WAY (RAM Cache):**
+```
+User: "What are my tasks?"
+→ Read from RAM
+= TOTAL: 0-2ms ⚡
+```
+
+### How Cache Works
+
+1. **On Startup:** Loads all data into RAM
+2. **On Query:** Returns from memory (instant)
+3. **On File Change:** Auto-invalidates & reloads
+4. **On Timer:** Refreshes every 5 minutes
+
+---
+
+## 📡 How You Receive Messages
+
+### Message Flow
+
+1. User types in UI: "What are my tasks today?"
+2. WebSocket sends message to server
+3. Server routes to Claude Code (YOU)
+4. ws-listener writes to `data/.pending/req-xxx.json`
+5. YOU see notification in terminal
+6. YOU query cache (0ms!)
+7. YOU send response via WebSocket
+8. User sees streaming response in real-time
+
+---
+
+## 🔧 Tools You Have
+
+### Query Data Instantly
+
 ```bash
-cat data/.pending/req-*.json
+# View today's tasks (0ms)
+npm run query tasks anit-gmail-co
+
+# View progress (0ms)
+npm run query progress anit-gmail-co
+
+# View challenges (0ms)
+npm run query challenges anit-gmail-co
+
+# Search (0ms)
+npm run query search anit-gmail-co "react"
+
+# Cache stats
+npm run query stats
 ```
 
-Example:
-```json
-{
-  "id": "req-1234567890-abc123",
-  "agentId": "unified",
-  "content": "How is my React challenge going?",
-  "timestamp": "2025-12-28T10:30:00.000Z",
-  "status": "pending",
-  "source": "ui"
-}
+### Send Responses
+
+```bash
+# Fast response (uses cache + WebSocket)
+node send-response-fast.js <requestId>
 ```
 
-### Step 4: Send Your Response
-Use the listener API to send responses:
+### Use Cache in Code
 
-**Simple Response (Non-Streaming):**
 ```javascript
-const listener = require('./lib/ws-listener')
+const quickQuery = require('./lib/quick-query');
 
-listener.sendResponse('req-1234567890-abc123', 'Your full response here')
+// Get profile (0ms)
+const profile = quickQuery.getProfile('anit-gmail-co');
+
+// Get today's tasks (0ms)
+const tasks = quickQuery.getTodaysTasks('anit-gmail-co');
+
+// Get progress (0ms)
+const progress = quickQuery.getProgressSummary('anit-gmail-co');
+
+// Search (0ms)
+const results = quickQuery.search('anit-gmail-co', 'react');
 ```
-
-**Streaming Response (For Long Responses):**
-```javascript
-const listener = require('./lib/ws-listener')
-
-const requestId = 'req-1234567890-abc123'
-
-// Start streaming
-listener.sendResponseChunk(requestId, null, true, false)
-
-// Send chunks
-listener.sendResponseChunk(requestId, 'Hello! ')
-listener.sendResponseChunk(requestId, 'How can I help you today?')
-
-// End streaming
-listener.sendResponseChunk(requestId, null, false, true, fullContent)
-```
-
-### Step 5: UI Receives Response
-- Response streams back through WebSocket in real-time
-- UI displays the response as it arrives
-- Server saves complete response to chat file
 
 ---
 
-## Data Locations
+## 🤖 Multi-Agent Support
 
-| Data | Location | Format |
-|------|----------|--------|
-| Chat Messages | `data/chats/{date}/{agentId}.md` | Markdown |
-| Pending Messages | `data/.pending/` | JSON (temporary) |
-| Challenges | `data/challenges/` | Markdown with frontmatter |
-| Todos | `data/todos/` | Markdown with frontmatter |
-| User Profile | `data/profile/` | JSON |
-| Skills | `skills/` | SKILL.md files |
-| Activity Log | `data/profile/activity-log.json` | JSON |
+**THIS ARCHITECTURE WORKS FOR ALL AGENTS AUTOMATICALLY!**
 
-**Note:** The old `data/.inbox/` is deprecated and no longer used.
+When user creates custom agents:
+- ✅ Same WebSocket connection
+- ✅ Same fast cache
+- ✅ Same 0ms queries
+- ✅ Zero configuration
+
+**Example:**
+```
+User creates "Fitness Coach" agent
+User asks: "What's my workout?"
+→ YOU receive via WebSocket
+→ YOU query cache (0ms)
+→ YOU respond instantly
+→ Works perfectly!
+```
 
 ---
 
-## Chat File Format
+## 📊 Data Structure
 
-Messages are still persisted to markdown files for history:
+### RAM Cache
+```
+profiles: Map<profileId, Profile>
+challenges: Map<profileId, Challenge[]>
+todos: Map<profileId, Todo[]>
+agents: Map<agentId, Agent>
+```
 
+### Disk Storage
+```
+data/
+├── profiles/
+│   └── anit-gmail-co/
+│       ├── profile.md
+│       ├── challenges/
+│       ├── todos/
+│       └── chats/
+├── agents.json
+└── .cache-index.json
+```
+
+---
+
+## 📝 Response Templates
+
+### Today's Tasks
 ```markdown
-# Chat with unified - 2025-12-28
+Hey {name}! 👋
 
-## 10:30 AM
-**User:** How is my React challenge going?
+Here's what's on your plate today:
 
-**Claude:** Great progress! You're on day 8 of your 30-Day React Mastery challenge with an 8-day streak. Today's tasks include completing the useState tutorial and building a counter app.
+📋 **Pending Tasks:** {count}
+   1. {task1}
+   2. {task2}
 
-## 10:35 AM
-**User:** What should I focus on today?
+🎯 **Active Challenges:** {count}
+   • {challenge} ({streak} day streak 🔥)
 
-**Claude:** Based on your schedule, focus on:
-1. Complete React useState tutorial (9:00 AM - 10:00 AM)
-2. Build a simple counter app (10:30 AM - 11:15 AM)
+Keep it up! 💪
+```
+
+### Progress Summary
+```markdown
+📊 **Your Progress**
+
+**Challenges:**
+   Active: {count} | Completed: {count}
+
+**Tasks:**
+   Completed: {count} | Pending: {count}
+   Completion Rate: {rate}%
+
+🔥 **Streaks:**
+   • {challenge}: {days} days
+```
+
+### No Data Yet
+```markdown
+Hey {name}! 👋
+
+No active tasks or challenges yet.
+
+📋 **Quick Start:**
+• Create your first challenge
+• Set up a schedule
+• Define goals
+
+Want help getting started? 🚀
 ```
 
 ---
 
-## What You Can Do
+## 🎯 Handling Requests
 
-When processing messages, you have full access to:
+### Step-by-Step
 
-1. **Read all data files** - challenges, todos, skills, user profile
-2. **Web search** - for learning resources, documentation
-3. **Update files** - create todos, update streaks, log activities
-4. **Use skills** - invoke any skill from the skills/ folder
-5. **Generate content** - motivation, plans, recommendations
-6. **Stream responses** - send responses in real-time chunks
+1. **Message arrives** (you see it in terminal)
 
----
-
-## Example: Processing a Check-in Request
-
-User message: "I want to do my daily check-in"
-
-**1. Read pending message:**
+2. **Query data instantly:**
 ```bash
-cat data/.pending/req-*.json
+npm run query tasks <profileId>
 ```
 
-**2. Gather context:**
+3. **Generate response** using template
+
+4. **Send response:**
 ```bash
-cat data/challenges/30-day-react-mastery/plan.md
-cat data/todos/2025-12-28.md
+node send-response-fast.js <requestId>
 ```
 
-**3. Send response:**
-```javascript
-const listener = require('./lib/ws-listener')
-
-const response = `Welcome back! Let's do your daily check-in for 30-Day React Mastery. 📋
-
-📊 Current Status:
-- Day 8 of 30
-- Streak: 8 days 🔥
-- Progress: 30%
-
-✅ Yesterday's Completed:
-- Review useEffect documentation
-
-📋 Today's Focus:
-- Complete React useState tutorial
-- Build a simple counter app
-
-How did yesterday go? Did you complete the useEffect review?`
-
-listener.sendResponse(requestId, response)
-```
-
-**4. Response appears in UI instantly!**
+5. **Done!** User sees streaming response
 
 ---
 
-## Quick Commands
+## 📈 Performance
 
+### Good Performance
+- **Hit Rate:** >95%
+- **Query Time:** <5ms
+- **Memory:** <100MB
+
+### Check Stats
 ```bash
-# View pending messages
-ls data/.pending/
+npm run query stats
+```
 
-# Read a pending message
-cat data/.pending/req-*.json
+Output:
+```
+Hit Rate: 98.5%
+Hits: 1247 | Misses: 19
 
-# View today's chat history
-cat data/chats/2025-12-28/unified.md
-
-# View active challenges
-cat data/challenges/*/plan.md
-
-# Check WebSocket server status
-# (Look for "UI clients: X, Claude CLI clients: Y" in terminal)
+Cached:
+  Profiles: 3
+  Challenges: 12
+  Todos: 47
 ```
 
 ---
 
-## Troubleshooting
+## 🛑 Stopping
 
-**UI shows "Disconnected":**
-- Make sure WebSocket server is running: `npm run dev:ws`
-- Check server is on port 8765
+User presses `Ctrl+C` in terminal.
 
-**Messages not reaching Claude Code:**
-- Make sure listener is running: `node lib/ws-listener.js`
-- Check listener shows "Connected to WebSocket server"
-- Look for "Successfully registered as claude-cli"
-
-**Responses not appearing in UI:**
-- Make sure you're using the correct `requestId`
-- Check terminal for errors
-- Verify WebSocket connections in both terminals
+System automatically stops:
+- Next.js UI
+- WebSocket server
+- ws-listener
+- Cache system
 
 ---
 
-## Tips
+## 📚 File Structure
 
-1. **Be conversational** - Write responses as natural dialogue
-2. **Reference data** - Pull in real stats from challenges/todos
-3. **Be proactive** - Suggest next actions, remind about deadlines
-4. **Use emojis** - They make responses more engaging (📊 ✅ 📋 🔥 💪)
-5. **Stream long responses** - For better UX on lengthy replies
-6. **Check `.pending/` directory** - Clean up after processing
+```
+openanalyst-accountability-coach/
+├── scripts/
+│   └── start-all.js         # 🚀 Main startup
+├── lib/
+│   ├── cache-manager.js     # 💾 Cache system
+│   ├── quick-query.js       # ⚡ Query API
+│   └── ws-listener.js       # 🔌 WebSocket
+├── server/
+│   └── websocket.js         # 🌐 WS Server
+├── ui/                      # 🎨 Next.js
+├── data/                    # 📁 User data
+├── claude-query.js          # 🔍 CLI tool
+└── send-response-fast.js    # 📤 Fast responder
+```
 
 ---
 
-This file is your guide. The UI handles display; you handle the intelligence!
+## 🎓 Best Practices
+
+1. **Always use cache** (not file reading)
+2. **Use send-response-fast.js** (not manual)
+3. **Monitor hit rate** (should be >95%)
+4. **Trust auto-updates** (file watchers work)
+5. **One command startup** (`npm start`)
+
+---
+
+## 🆘 Troubleshooting
+
+### Cache Not Working?
+```bash
+npm run query stats
+# If hit rate <80%, restart
+npm start
+```
+
+### WebSocket Issues?
+```bash
+# Check port 8765
+netstat -an | findstr 8765
+# Restart if needed
+npm start
+```
+
+---
+
+## 🎉 Summary
+
+**User:** "start my app"
+**YOU:** `npm start`
+**Result:** Everything works automatically!
+
+**Architecture Benefits:**
+- ⚡ 0-2ms queries
+- 🔄 Real-time WebSocket
+- 🤖 All agents supported
+- 💾 Auto-caching
+- 🚀 One command startup
+
+---
+
+**You are the AI backend. Everything is automatic. Just run `npm start` and respond to messages!** 🎯

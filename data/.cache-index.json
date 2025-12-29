@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "lastBuild": "2025-12-29T10:01:31.055Z",
+  "profiles": {
+    "anit-gmail-co": {
+      "id": "anit-gmail-co",
+      "path": "C:\\Users\\Anit\\Downloads\\OpenAnalyst Accountability coach\\data\\profiles\\anit-gmail-co",
+      "challenges": "C:\\Users\\Anit\\Downloads\\OpenAnalyst Accountability coach\\data\\profiles\\anit-gmail-co\\challenges",
+      "todos": "C:\\Users\\Anit\\Downloads\\OpenAnalyst Accountability coach\\data\\profiles\\anit-gmail-co\\todos",
+      "chats": "C:\\Users\\Anit\\Downloads\\OpenAnalyst Accountability coach\\data\\profiles\\anit-gmail-co\\chats"
+    }
+  },
+  "agents": {},
+  "stats": {
+    "totalProfiles": 1,
+    "totalChallenges": 0,
+    "totalTodos": 0
+  }
+}

@@ -4,16 +4,16 @@
   "description": "Your Personal Accountability Coach - powered by Claude Code",
   "main": "lib/index.js",
   "scripts": {
+    "start": "node scripts/start-all.js",
     "init": "node scripts/init.js",
     "install-plugin": "node scripts/install-plugin.js",
-    "start": "node scripts/start-app.js",
     "dev": "cd ui && npm run dev",
     "dev:ws": "node server/websocket.js",
-    "dev:all": "node scripts/start-app.js",
     "build": "cd ui && npm run build",
     "test": "node --test lib/**/*.test.js",
     "seed": "node scripts/generate-sample-data.js",
-    "generate-challenge": "node scripts/generate-challenge-data.js"
+    "generate-challenge": "node scripts/generate-challenge-data.js",
+    "query": "node claude-query.js"
   },
   "keywords": [
     "accountability",

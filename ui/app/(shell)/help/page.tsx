@@ -24,7 +24,7 @@ export default function HelpPage() {
             <h3 className="text-lg font-semibold mb-3">Welcome to OpenAnalyst Accountability Coach</h3>
             <p className="text-sm text-oa-text-secondary leading-relaxed mb-4">
               This is your personal accountability system powered by AI. Everything runs locally on your machine,
-              and all your data is stored in <code className="px-2 py-1 bg-oa-bg-secondary border border-oa-border">~/.openanalyst/</code> directory.
+              and all your data is stored in <code className="px-2 py-1 bg-oa-bg-secondary border border-oa-border">data/</code> directory.
             </p>
           </div>
 
@@ -87,7 +87,7 @@ export default function HelpPage() {
               Click the "Add Agent" button in the left sidebar. You'll need to create:
             </p>
             <ol className="text-sm text-oa-text-secondary space-y-2 list-decimal list-inside">
-              <li>Agent folder in <code className="px-1 bg-oa-bg-secondary">~/.openanalyst/agents/</code></li>
+              <li>Agent folder in <code className="px-1 bg-oa-bg-secondary">data/agents/</code></li>
               <li><code className="px-1 bg-oa-bg-secondary">agent.json</code> config file with name, description, capabilities</li>
               <li>Optional: custom prompt file for specialized behavior</li>
             </ol>
@@ -96,7 +96,7 @@ export default function HelpPage() {
           <div>
             <h4 className="font-semibold mb-2">Agent File Structure</h4>
             <pre className="bg-oa-bg-secondary border border-oa-border p-4 text-xs overflow-x-auto">
-{`~/.openanalyst/agents/
+{`data/agents/
 ├── accountability-coach/
 │   ├── agent.json          # Agent configuration
 │   ├── context/            # Agent-specific knowledge
@@ -150,7 +150,7 @@ export default function HelpPage() {
               All check-ins are saved as markdown files:
             </p>
             <code className="block bg-oa-bg-secondary border border-oa-border p-3 text-xs">
-              ~/.openanalyst/checkins/YYYY-MM-DD.md
+              data/checkins/YYYY-MM-DD.md
             </code>
             <p className="text-xs text-oa-text-secondary mt-2">
               You can edit these files manually if needed. They're human-readable and version-control friendly.
@@ -176,7 +176,7 @@ export default function HelpPage() {
           <div>
             <h3 className="text-lg font-semibold mb-3">Intelligent Scheduling</h3>
             <p className="text-sm text-oa-text-secondary leading-relaxed mb-4">
-              Your schedule is stored in <code className="px-2 py-1 bg-oa-bg-secondary">~/.openanalyst/schedule/calendar.json</code>.
+              Your schedule is stored in <code className="px-2 py-1 bg-oa-bg-secondary">data/schedule/calendar.json</code>.
               It works like Google Calendar but with AI-powered intelligent rescheduling.
             </p>
           </div>
@@ -392,7 +392,7 @@ export default function HelpPage() {
               All conversations are saved to markdown files:
             </p>
             <code className="block bg-oa-bg-secondary border border-oa-border p-3 text-xs">
-              ~/.openanalyst/chats/YYYY-MM-DD/agent-name.md
+              data/chats/YYYY-MM-DD/agent-name.md
             </code>
           </div>
 
@@ -415,7 +415,7 @@ export default function HelpPage() {
           <div>
             <h3 className="text-lg font-semibold mb-3">Understanding Your Data</h3>
             <p className="text-sm text-oa-text-secondary leading-relaxed mb-4">
-              Everything is stored in <code className="px-2 py-1 bg-oa-bg-secondary">~/.openanalyst/</code>.
+              Everything is stored in <code className="px-2 py-1 bg-oa-bg-secondary">data/</code>.
               All files are human-readable (markdown/JSON). You can edit, backup, or version control them.
             </p>
           </div>
@@ -423,7 +423,7 @@ export default function HelpPage() {
           <div>
             <h4 className="font-semibold mb-2">Complete Directory Structure</h4>
             <pre className="bg-oa-bg-secondary border border-oa-border p-4 text-xs overflow-x-auto leading-relaxed">
-{`~/.openanalyst/
+{`data/
 ├── .registry/              # System metadata
 │   └── challenges.json     # All challenges with streaks
 │
@@ -516,7 +516,7 @@ export default function HelpPage() {
 {`ANTHROPIC_API_KEY=your_claude_api_key_here
 GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-1.5-pro
-OPENANALYST_DIR=/path/to/.openanalyst  # Optional, defaults to ~/.openanalyst`}
+OPENANALYST_DIR=data  # Optional, defaults to data/`}
             </pre>
           </div>
 

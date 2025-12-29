@@ -25,7 +25,13 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git branch:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npm start)",
+      "Bash(timeout /t 5 /nobreak)",
+      "Bash(del \"C:\\\\Users\\\\Anit\\\\Downloads\\\\OpenAnalyst Accountability coach\\\\data\\\\.inbox\\\\msg-1766926614099-pwmy0qa5t.json\")",
+      "Bash(del \"C:\\\\Users\\\\Anit\\\\Downloads\\\\OpenAnalyst Accountability coach\\\\data\\\\.inbox\\\\msg-1766930157281-v5o522vq9.json\")",
+      "Bash(npx tsc:*)",
+      "Bash(test:*)"
     ]
   }
 }

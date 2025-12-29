@@ -11,8 +11,25 @@ const wss = new WebSocket.Server({ port: PORT });
 
 console.log(`🚀 WebSocket server started on ws://localhost:${PORT}`);
 
-// Store connected clients
-const clients = new Map();
+// Store connected clients by type
+const clients = {
+  ui: new Set(),
+  'claude-cli': new Set(),
+  unknown: new Set()
+};
+
+// Message queue for when Claude Code is offline
+const messageQueue = [];
+
+// Send message to specific client types
+function sendToClients(clientType, message, excludeClient = null) {
+  const messageStr = JSON.stringify(message);
+  clients[clientType].forEach(client => {
+    if (client !== excludeClient && client.readyState === WebSocket.OPEN) {
+      client.send(messageStr);
+    }
+  });
+}
 
 // Broadcast to all connected clients
 function broadcast(message, excludeClient = null) {
@@ -24,17 +41,41 @@ function broadcast(message, excludeClient = null) {
   });
 }
 
+// Queue message for Claude Code if offline
+function queueOrSend(message) {
+  if (clients['claude-cli'].size === 0) {
+    console.log('📥 Claude Code offline, queueing message');
+    messageQueue.push(message);
+  } else {
+    sendToClients('claude-cli', message);
+  }
+}
+
+// Flush queued messages to Claude Code
+function flushQueue() {
+  if (messageQueue.length > 0 && clients['claude-cli'].size > 0) {
+    console.log(`📤 Flushing ${messageQueue.length} queued messages to Claude Code`);
+    messageQueue.forEach(msg => sendToClients('claude-cli', msg));
+    messageQueue.length = 0;
+  }
+}
+
 // Handle new connections
 wss.on('connection', (ws) => {
   const clientId = Date.now().toString();
-  clients.set(clientId, ws);
+  let clientType = 'unknown';
 
-  console.log(`✅ Client connected: ${clientId} (Total clients: ${clients.size})`);
+  // Add to unknown initially
+  clients.unknown.add(ws);
+  ws.clientId = clientId;
+  ws.clientType = clientType;
+
+  console.log(`✅ Client connected: ${clientId} (awaiting registration)`);
 
   // Send welcome message
   ws.send(JSON.stringify({
     type: 'status',
-    content: 'Connected to OpenAnalyst WebSocket server',
+    content: 'Connected to OpenAnalyst WebSocket server. Please register your client type.',
     timestamp: new Date().toISOString()
   }));
 
@@ -42,12 +83,40 @@ wss.on('connection', (ws) => {
   ws.on('message', async (data) => {
     try {
       const message = JSON.parse(data.toString());
-      console.log(`📨 Received message:`, message);
+      console.log(`📨 Received from ${ws.clientType}:`, message.type);
 
       // Handle different message types
       switch (message.type) {
+        case 'register':
+          // Client registering its type
+          handleClientRegistration(ws, message);
+          break;
+
         case 'chat':
-          await handleChatMessage(message, ws);
+          // Route based on sender
+          if (ws.clientType === 'ui') {
+            // UI sent message → forward to Claude Code
+            handleUIMessage(message, ws);
+          } else {
+            console.log('⚠️ Only UI clients can send chat messages');
+          }
+          break;
+
+        case 'response_start':
+        case 'response_chunk':
+        case 'response_end':
+          // Claude Code sending response → forward to UI
+          if (ws.clientType === 'claude-cli') {
+            sendToClients('ui', message);
+            // Also save to chat file when response ends
+            if (message.type === 'response_end' && message.fullContent) {
+              saveChatMessage(message.agentId, {
+                role: 'assistant',
+                content: message.fullContent,
+                timestamp: new Date().toISOString()
+              });
+            }
+          }
           break;
 
         case 'file_update':
@@ -55,12 +124,12 @@ wss.on('connection', (ws) => {
           break;
 
         case 'typing':
-          broadcast({
-            type: 'typing',
-            agentId: message.agentId,
-            isTyping: message.isTyping,
-            timestamp: new Date().toISOString()
-          }, ws);
+          // Forward typing indicators
+          if (ws.clientType === 'ui') {
+            sendToClients('claude-cli', message);
+          } else if (ws.clientType === 'claude-cli') {
+            sendToClients('ui', message);
+          }
           break;
 
         case 'ping':
@@ -85,8 +154,10 @@ wss.on('connection', (ws) => {
 
   // Handle client disconnect
   ws.on('close', () => {
-    clients.delete(clientId);
-    console.log(`👋 Client disconnected: ${clientId} (Total clients: ${clients.size})`);
+    // Remove from appropriate set
+    clients[ws.clientType].delete(ws);
+    console.log(`👋 ${ws.clientType} client disconnected: ${clientId}`);
+    console.log(`   UI clients: ${clients.ui.size}, Claude CLI clients: ${clients['claude-cli'].size}`);
   });
 
   // Handle errors
@@ -95,139 +166,60 @@ wss.on('connection', (ws) => {
   });
 });
 
-// Handle chat messages
-async function handleChatMessage(message, ws) {
-  const { agentId, content, requestId } = message;
+// Handle client registration
+function handleClientRegistration(ws, message) {
+  const { clientType } = message;
 
-  // Send typing indicator
-  broadcast({
-    type: 'typing',
-    agentId,
-    isTyping: true,
-    timestamp: new Date().toISOString()
-  });
+  if (clientType === 'ui' || clientType === 'claude-cli') {
+    // Move from unknown to appropriate set
+    clients.unknown.delete(ws);
+    clients[clientType].add(ws);
+    ws.clientType = clientType;
 
-  // Simulate response (in real implementation, this would call Claude API)
-  setTimeout(() => {
-    // Send response start
+    console.log(`✅ Client registered as: ${clientType} (${ws.clientId})`);
+    console.log(`   UI clients: ${clients.ui.size}, Claude CLI clients: ${clients['claude-cli'].size}`);
+
     ws.send(JSON.stringify({
-      type: 'response_start',
-      agentId,
-      requestId,
+      type: 'registered',
+      clientType,
       timestamp: new Date().toISOString()
     }));
 
-    // Simulate streaming response
-    const responseText = generateResponse(content);
-    const words = responseText.split(' ');
-    let currentIndex = 0;
-
-    const streamInterval = setInterval(() => {
-      if (currentIndex >= words.length) {
-        clearInterval(streamInterval);
-
-        // Send response end
-        ws.send(JSON.stringify({
-          type: 'response_end',
-          agentId,
-          requestId,
-          timestamp: new Date().toISOString()
-        }));
-
-        // Stop typing indicator
-        broadcast({
-          type: 'typing',
-          agentId,
-          isTyping: false,
-          timestamp: new Date().toISOString()
-        });
-
-        // Save chat message
-        saveChatMessage(agentId, {
-          role: 'user',
-          content,
-          timestamp: new Date().toISOString()
-        });
-
-        saveChatMessage(agentId, {
-          role: 'assistant',
-          content: responseText,
-          timestamp: new Date().toISOString()
-        });
-
-        return;
-      }
-
-      const chunk = words.slice(currentIndex, currentIndex + 3).join(' ') + ' ';
-      ws.send(JSON.stringify({
-        type: 'response_chunk',
-        agentId,
-        requestId,
-        content: chunk,
-        timestamp: new Date().toISOString()
-      }));
-
-      currentIndex += 3;
-    }, 100);
-
-  }, 500);
+    // If Claude Code just connected, flush queued messages
+    if (clientType === 'claude-cli') {
+      flushQueue();
+    }
+  } else {
+    ws.send(JSON.stringify({
+      type: 'error',
+      content: 'Invalid client type. Must be "ui" or "claude-cli"',
+      timestamp: new Date().toISOString()
+    }));
+  }
 }
 
-// Generate mock response based on content
-function generateResponse(content) {
-  const lowerContent = content.toLowerCase();
+// Handle message from UI
+function handleUIMessage(message, ws) {
+  const { agentId, content, requestId } = message;
 
-  if (lowerContent.includes('check-in') || lowerContent.includes('checkin')) {
-    return `Great! Let's do your check-in for today.
+  console.log(`💬 UI message for ${agentId}: "${content.substring(0, 50)}..."`);
 
-How are you feeling about your progress today? I'll walk you through a few quick questions:
+  // Save user message to chat file
+  saveChatMessage(agentId, {
+    role: 'user',
+    content,
+    timestamp: new Date().toISOString()
+  });
 
-1. How's your mood today? (1-5, where 5 is excellent)
-2. Did you complete your planned tasks?
-3. What wins did you have today?
-4. Any blockers or challenges?
-5. What's your commitment for tomorrow?
-
-Just answer naturally, and I'll help you track your progress!`;
-  }
-
-  if (lowerContent.includes('new challenge') || lowerContent.includes('create') && lowerContent.includes('challenge')) {
-    return `Excellent! Let's create a new challenge together. I'll help you design something achievable and motivating.
-
-First, tell me: What skill or goal would you like to work on?
-
-Some examples:
-- Learn a new programming language
-- Build a fitness habit
-- Complete a creative project
-- Develop a daily meditation practice
-
-What interests you?`;
-  }
-
-  if (lowerContent.includes('vision board')) {
-    return `I love this! Vision boards are powerful for manifesting your goals. Let's create something inspiring.
-
-To start, think about your aspirations in these areas:
-- Career & Professional Growth
-- Health & Fitness
-- Personal Development
-- Relationships
-- Creative Projects
-
-What goals or dreams would you like to visualize? Share your thoughts, and I'll help you design a beautiful vision board.`;
-  }
-
-  return `I'm here to help you stay accountable and achieve your goals!
-
-You can:
-- Create a new challenge
-- Do a quick check-in
-- Create a vision board
-- Track your progress
-- Review your streaks
-
-What would you like to work on today?`;
+  // Forward to Claude Code (or queue if offline)
+  queueOrSend({
+    type: 'chat',
+    agentId,
+    content,
+    requestId,
+    timestamp: new Date().toISOString(),
+    data: message.data
+  });
 }
 
 // Handle file updates

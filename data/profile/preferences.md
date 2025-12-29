@@ -1,7 +1,7 @@
 # Preferences
 
 ## Accountability Style
-- **Type:** Tough Love
+- **Type:** Balanced
 - **Check-in Frequency:** Daily
 - **Reminder Tone:** Firm but encouraging
 

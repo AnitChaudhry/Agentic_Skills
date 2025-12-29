@@ -14,7 +14,7 @@
     "if I fail"
   ],
   "config": {
-    "data_dir": "~/.openanalyst/contracts",
+    "data_dir": "data/contracts",
     "require_referee": true,
     "escalating_stakes": true,
     "anti_charity_enabled": true,

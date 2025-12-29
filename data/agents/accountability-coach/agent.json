@@ -6,13 +6,22 @@
   "skills": [
     "streak",
     "daily-checkin",
-    "motivation",
-    "punishment",
-    "challenge-onboarding",
-    "user-onboarding",
-    "schedule-replanner"
+    "smart-scheduler",
+    "nanobanana-skill"
   ],
   "createdAt": "2025-01-01T00:00:00.000Z",
-  "updatedAt": "2025-01-01T00:00:00.000Z",
-  "isDefault": true
+  "updatedAt": "2025-12-28T18:38:45.873Z",
+  "isDefault": true,
+  "avatar": "coach",
+  "capabilities": [
+    "challenge-creation",
+    "daily-checkin",
+    "progress-tracking",
+    "motivation",
+    "planning"
+  ],
+  "personality": {
+    "tone": "encouraging",
+    "style": "supportive but honest"
+  }
 }

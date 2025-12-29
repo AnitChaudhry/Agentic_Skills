@@ -381,7 +381,7 @@ export default function SettingsPage() {
               Reset App (Delete All Data)
             </button>
             <p className="text-xs text-oa-text-secondary mt-4">
-              All your data is stored locally in <code className="bg-oa-bg-tertiary px-1 py-0.5 rounded">~/.openanalyst/</code>
+              All your data is stored locally in <code className="bg-oa-bg-tertiary px-1 py-0.5 rounded">data/</code>
             </p>
           </div>
         </Section>

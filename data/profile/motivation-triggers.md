@@ -4,7 +4,7 @@
 - undefined
 
 ## Current Big Goal
-Learning 
+Learning AI Skills with 10x in 2026
 
 ## Notes
 User prefers undefined accountability style.

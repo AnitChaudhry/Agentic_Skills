@@ -14,6 +14,7 @@
     "new goal"
   ],
   "config": {
+    "data_dir": "data/challenges",
     "min_questions": 5,
     "max_questions": 8,
     "commitment_score_threshold": 8,

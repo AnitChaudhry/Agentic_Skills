@@ -15,7 +15,12 @@
       "tone": "encouraging",
       "style": "supportive but honest"
     },
-    "skills": ["streak", "daily-checkin", "smart-scheduler"],
+    "skills": [
+      "streak",
+      "daily-checkin",
+      "smart-scheduler",
+      "nanobanana-skill"
+    ],
     "isDefault": true
   }
 ]

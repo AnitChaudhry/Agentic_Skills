@@ -14,7 +14,7 @@
     "first time"
   ],
   "config": {
-    "data_dir": "~/.openanalyst/profile",
+    "data_dir": "data/profile",
     "required_before_ui": true,
     "min_questions": 5,
     "max_questions": 10

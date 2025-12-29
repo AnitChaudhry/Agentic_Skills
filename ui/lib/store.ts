@@ -116,86 +116,65 @@ export const useChatStore = create<ChatState>((set, get) => ({
     get().addMessage(agentId, message)
 
     try {
-      // Send message to inbox for Claude Code to read
-      const response = await fetch('/api/chat/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          agentId,
-          content,
-          attachments: attachments?.map(f => f.name) || [],
-        }),
+      // Import WebSocket client
+      const { getWebSocketClient } = await import('./websocket')
+      const wsClient = getWebSocketClient()
+
+      // Show waiting indicator
+      set({ isTyping: true })
+
+      // Add a pending response message
+      const pendingMessageId = `pending-${Date.now()}`
+      get().addMessage(agentId, {
+        id: pendingMessageId,
+        role: 'assistant',
+        content: '💬 Waiting for response...',
+        timestamp: new Date().toISOString(),
+        agentId,
+        metadata: { isPending: true },
       })
 
-      const result = await response.json()
+      // Send via WebSocket and wait for response
+      try {
+        const response = await wsClient.sendChatMessage(agentId, content, attachments?.map(f => f.name))
 
-      if (result.success) {
-        // Show waiting indicator
-        set({ isTyping: true })
+        // Remove pending message and add real response
+        const messages = get().messages[agentId] || []
+        const filteredMessages = messages.filter(m => m.id !== pendingMessageId)
 
-        // Add a pending response message
-        const pendingMessageId = `pending-${Date.now()}`
-        get().addMessage(agentId, {
-          id: pendingMessageId,
-          role: 'assistant',
-          content: '📥 Message received! Claude Code will respond shortly...\n\n_Check your CLI terminal - your message is in the inbox._',
-          timestamp: new Date().toISOString(),
-          agentId,
-          metadata: { isPending: true, requestId: result.requestId },
+        set({
+          messages: {
+            ...get().messages,
+            [agentId]: [...filteredMessages, {
+              id: `assistant-${Date.now()}`,
+              role: 'assistant',
+              content: response,
+              timestamp: new Date().toISOString(),
+              agentId,
+            }],
+          },
+          isTyping: false,
         })
+      } catch (wsError: any) {
+        console.error('WebSocket send failed:', wsError)
 
-        // Poll for response (check every 2 seconds for up to 2 minutes)
-        let attempts = 0
-        const maxAttempts = 60
-        const currentMessageCount = get().messages[agentId]?.length || 0
+        // Remove pending message
+        const messages = get().messages[agentId] || []
+        const filteredMessages = messages.filter(m => m.id !== pendingMessageId)
 
-        const pollForResponse = async () => {
-          attempts++
-          try {
-            const latestRes = await fetch(`/api/chat/latest?agentId=${agentId}`)
-            const latestData = await latestRes.json()
-
-            // Check if there's a new assistant message
-            const assistantMessages = latestData.messages?.filter(
-              (m: any) => m.role === 'assistant' && !m.metadata?.isPending
-            ) || []
-
-            if (assistantMessages.length > 0) {
-              const latestAssistant = assistantMessages[assistantMessages.length - 1]
-
-              // Remove pending message and add real response
-              const messages = get().messages[agentId] || []
-              const filteredMessages = messages.filter(m => m.id !== pendingMessageId)
-
-              set({
-                messages: {
-                  ...get().messages,
-                  [agentId]: [...filteredMessages, {
-                    id: `assistant-${Date.now()}`,
-                    role: 'assistant',
-                    content: latestAssistant.content,
-                    timestamp: new Date().toISOString(),
-                    agentId,
-                  }],
-                },
-                isTyping: false,
-              })
-              return // Stop polling
-            }
-          } catch (err) {
-            console.error('Poll error:', err)
-          }
-
-          // Continue polling if not reached max attempts
-          if (attempts < maxAttempts) {
-            setTimeout(pollForResponse, 2000)
-          } else {
-            set({ isTyping: false })
-          }
-        }
-
-        // Start polling after a short delay
-        setTimeout(pollForResponse, 2000)
+        set({
+          messages: {
+            ...get().messages,
+            [agentId]: [...filteredMessages, {
+              id: `error-${Date.now()}`,
+              role: 'assistant',
+              content: '❌ Failed to get response. Make sure Claude Code listener is running.',
+              timestamp: new Date().toISOString(),
+              agentId,
+            }],
+          },
+          isTyping: false,
+        })
       }
     } catch (error) {
       console.error('Failed to send message:', error)

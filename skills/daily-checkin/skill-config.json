@@ -14,7 +14,7 @@
     "daily review"
   ],
   "config": {
-    "data_dir": "~/.openanalyst/checkins",
+    "data_dir": "data/checkins",
     "default_time": "21:00",
     "reminder_enabled": true,
     "streak_integration": true

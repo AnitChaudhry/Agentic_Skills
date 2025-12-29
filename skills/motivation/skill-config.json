@@ -15,7 +15,7 @@
     "inspire me"
   ],
   "config": {
-    "data_dir": "~/.openanalyst/motivation",
+    "data_dir": "data/motivation",
     "personalized": true,
     "quote_sources": ["user_goals", "past_wins", "role_models"],
     "avoid_generic": true

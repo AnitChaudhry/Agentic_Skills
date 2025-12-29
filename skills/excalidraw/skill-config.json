@@ -14,7 +14,7 @@
     "system diagram"
   ],
   "config": {
-    "output_dir": "./output/diagrams",
+    "output_dir": "data/diagrams",
     "default_theme": "light",
     "include_legend": true
   }

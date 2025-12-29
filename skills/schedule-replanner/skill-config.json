@@ -15,7 +15,7 @@
     "reschedule"
   ],
   "config": {
-    "data_dir": "~/.openanalyst/schedule",
+    "data_dir": "data/schedule",
     "max_replans_per_week": 2,
     "protect_streaks": true,
     "require_justification": true

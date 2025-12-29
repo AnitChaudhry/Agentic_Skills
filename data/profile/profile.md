@@ -1,9 +1,9 @@
 # User Profile
 
-- **Name:** Anit
-- **Timezone:** New York
+- **Name:** Anit 
+- **Timezone:** NewYour
 - **Created:** 2025-12-28
 - **Onboarding Completed:** true
 
 ## About
-Big goal: Learning 
+Big goal: Learning AI Skills with 10x in 2026

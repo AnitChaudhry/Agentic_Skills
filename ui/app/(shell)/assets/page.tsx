@@ -19,7 +19,7 @@ export default function AssetsPage() {
                 Vision boards and generated images will appear here.
               </p>
               <p className="text-sm text-oa-text-secondary mt-2">
-                Stored in <code className="bg-oa-bg-secondary px-1">~/.openanalyst/assets/images/</code>
+                Stored in <code className="bg-oa-bg-secondary px-1">data/assets/images/</code>
               </p>
             </Card>
           </div>
@@ -33,7 +33,7 @@ export default function AssetsPage() {
                 Progress summary videos will appear here.
               </p>
               <p className="text-sm text-oa-text-secondary mt-2">
-                Stored in <code className="bg-oa-bg-secondary px-1">~/.openanalyst/assets/videos/</code>
+                Stored in <code className="bg-oa-bg-secondary px-1">data/assets/videos/</code>
               </p>
             </Card>
           </div>
@@ -47,7 +47,7 @@ export default function AssetsPage() {
                 Files uploaded via chat will appear here.
               </p>
               <p className="text-sm text-oa-text-secondary mt-2">
-                Stored in <code className="bg-oa-bg-secondary px-1">~/.openanalyst/assets/uploads/</code>
+                Stored in <code className="bg-oa-bg-secondary px-1">data/assets/uploads/</code>
               </p>
             </Card>
           </div>

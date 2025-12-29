@@ -5,12 +5,14 @@ type MessageHandler = (message: WebSocketMessage) => void
 type ConnectionHandler = (connected: boolean) => void
 
 export interface WebSocketMessage {
-  type: 'chat' | 'status' | 'file_update' | 'error' | 'typing' | 'response_start' | 'response_chunk' | 'response_end'
+  type: 'register' | 'registered' | 'chat' | 'status' | 'file_update' | 'error' | 'typing' | 'response_start' | 'response_chunk' | 'response_end'
   agentId?: string
   content?: string
   data?: Record<string, any>
   timestamp?: string
   requestId?: string
+  clientType?: 'ui' | 'claude-cli'
+  fullContent?: string
 }
 
 export interface PendingRequest {
@@ -61,9 +63,17 @@ class WebSocketClient {
         this.ws = new WebSocket(this.url)
 
         this.ws.onopen = () => {
-          console.log('[WebSocket] Connected to Claude Code')
+          console.log('[WebSocket] Connected to server, registering as UI client...')
           this.isConnecting = false
           this.reconnectAttempts = 0
+
+          // Register as UI client
+          this.send({
+            type: 'register',
+            clientType: 'ui',
+            timestamp: new Date().toISOString()
+          })
+
           this.notifyConnectionHandlers(true)
           resolve()
         }
@@ -168,8 +178,13 @@ class WebSocketClient {
 
     // Handle specific message types
     switch (message.type) {
+      case 'registered':
+        console.log('[WebSocket] Successfully registered as UI client')
+        break
+
       case 'response_start':
         // Claude Code is starting to respond
+        console.log('[WebSocket] Response started for', message.requestId)
         break
 
       case 'response_chunk':
@@ -187,9 +202,11 @@ class WebSocketClient {
         if (message.requestId) {
           const pending = this.pendingRequests.get(message.requestId)
           if (pending) {
-            const fullResponse = pending.chunks.join('')
+            // Use fullContent if provided, otherwise join chunks
+            const fullResponse = message.fullContent || pending.chunks.join('')
             this.pendingRequests.delete(message.requestId)
             pending.resolve(fullResponse)
+            console.log('[WebSocket] Response completed for', message.requestId)
           }
         }
         break

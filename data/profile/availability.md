@@ -1,9 +1,9 @@
 # Availability
 
 ## Productivity Pattern
-- **Peak Hours:** Morning (6-12pm)
+- **Peak Hours:** Night (12-6am)
 - **Daily Capacity:** 1-2 hours hours
-- **Timezone:** New York
+- **Timezone:** NewYour
 
 ## Weekly Schedule
 | Day | Available | Notes |

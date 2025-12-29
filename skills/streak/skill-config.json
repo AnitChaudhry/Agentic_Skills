@@ -27,7 +27,7 @@
     ]
   },
   "config": {
-    "data_dir": "~/.openanalyst/challenges",
+    "data_dir": "data/challenges",
     "default_cadence": "daily",
     "supported_types": [
       "learning",

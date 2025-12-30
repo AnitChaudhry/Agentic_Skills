@@ -28,19 +28,16 @@ export default function SchedulePage() {
       const todosData = await todosRes.json()
       const todos = Array.isArray(todosData) ? todosData : []
 
-      // Load challenges for metadata
-      const challengesRes = await fetch('/api/challenges')
-      const challengesData = await challengesRes.json()
-      const challenges = challengesData.challenges || []
-
       // Convert challenge tasks to calendar events
       // Group by day and create daily events
       const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
       const challengeEvents = challengeTasks.map((task: any, index: number) => {
-        // Calculate date based on challenge start + day number
-        const challenge = challenges.find((c: any) => c.id === task.challengeId)
-        const startDate = challenge?.startDate ? new Date(challenge.startDate) : today
-        const taskDate = new Date(startDate)
+        // Calculate date relative to TODAY as the reference point
+        // Day 1 = today, Day 2 = tomorrow, etc.
+        // This makes the schedule show current/upcoming tasks based on the current date
+        const taskDate = new Date(today)
         taskDate.setDate(taskDate.getDate() + (task.day - 1))
 
         return {

@@ -93,9 +93,11 @@ export async function GET(request: NextRequest) {
         // Optional date filter
         if (dateFilter) {
           if (dateFilter === 'today') {
-            // For "today", show current day based on challenge progress
-            // Simple: just show day 1-3 for now
-            if (dayNum > 3) continue
+            // For "today", show Day 1 tasks (relative to current progress)
+            if (dayNum > 1) continue
+          } else if (dateFilter === 'week') {
+            // Show first 7 days
+            if (dayNum > 7) continue
           } else if (!filename.includes(dateFilter) && `day-${dateFilter.padStart(2, '0')}` !== filename.replace('.md', '')) {
             continue
           }

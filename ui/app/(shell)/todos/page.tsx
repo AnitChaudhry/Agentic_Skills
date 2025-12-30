@@ -304,7 +304,7 @@ export default function TodosPage() {
                   <h3 className="text-lg font-medium text-oa-accent mb-3">
                     {challenge.name}
                   </h3>
-                  {Object.entries(challenge.days).slice(0, 3).map(([dayNum, day]) => (
+                  {Object.entries(challenge.days).map(([dayNum, day]) => (
                     <div key={dayNum} className="mb-4 ml-4">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-sm font-medium text-oa-text-primary">

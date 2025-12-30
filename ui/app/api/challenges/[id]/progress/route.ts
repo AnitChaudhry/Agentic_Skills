@@ -9,34 +9,62 @@ export async function GET(
 ) {
   try {
     const challengeId = params.id
-    const progressPath = path.join(
-      PATHS.challenges,
-      challengeId,
-      'progress.md'
-    )
+    const challengeDir = path.join(PATHS.challenges, challengeId)
 
-    const content = await fs.readFile(progressPath, 'utf-8')
-
-    // Parse milestones
-    const milestoneRegex = /^- \[([ x])\] (.+)$/gm
+    let content = ''
     const milestones: any[] = []
-    let match
 
-    while ((match = milestoneRegex.exec(content)) !== null) {
-      milestones.push({
-        id: `milestone-${milestones.length + 1}`,
-        challengeId: challengeId,
-        title: match[2].trim(),
-        description: '',
-        target: 0,
-        achieved: match[1] === 'x',
-        achievedAt: match[1] === 'x' ? new Date().toISOString() : undefined,
-      })
+    // Try progress.md first, then challenge.md
+    const progressPath = path.join(challengeDir, 'progress.md')
+    const challengePath = path.join(challengeDir, 'challenge.md')
+
+    try {
+      content = await fs.readFile(progressPath, 'utf-8')
+    } catch {
+      try {
+        content = await fs.readFile(challengePath, 'utf-8')
+      } catch {
+        // No MD files found
+      }
     }
+
+    // Parse milestones from ## Milestones section
+    const milestonesSection = content.match(/## Milestones\n([\s\S]*?)(?=\n##|$)/i)
+    if (milestonesSection) {
+      const milestoneRegex = /^- \[([ xX])\] (.+)$/gm
+      let match
+
+      while ((match = milestoneRegex.exec(milestonesSection[1])) !== null) {
+        // Extract day number if present (e.g., "Week 1 Complete (Day 7)")
+        const dayMatch = match[2].match(/\(Day (\d+)\)/)
+        milestones.push({
+          id: `milestone-${milestones.length + 1}`,
+          challengeId: challengeId,
+          title: match[2].replace(/\s*\(Day \d+\)/, '').trim(),
+          description: '',
+          day: dayMatch ? parseInt(dayMatch[1]) : null,
+          achieved: match[1].toLowerCase() === 'x',
+          achievedAt: match[1].toLowerCase() === 'x' ? new Date().toISOString() : undefined,
+        })
+      }
+    }
+
+    // Also extract progress percentage if available
+    const progressMatch = content.match(/Overall:\*\*\s*(\d+)%/i)
+    const progress = progressMatch ? parseInt(progressMatch[1]) : 0
+
+    // Extract streak info
+    const currentStreakMatch = content.match(/Current:\*\*\s*(\d+)/i)
+    const bestStreakMatch = content.match(/Best:\*\*\s*(\d+)/i)
 
     return NextResponse.json({
       content,
       milestones,
+      progress,
+      streak: {
+        current: currentStreakMatch ? parseInt(currentStreakMatch[1]) : 0,
+        best: bestStreakMatch ? parseInt(bestStreakMatch[1]) : 0,
+      },
       lastUpdated: new Date().toISOString(),
     })
   } catch (error: any) {

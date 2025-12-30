@@ -10,11 +10,11 @@ const getActiveProfileId = (): string | null => {
   return localStorage.getItem('activeProfileId')
 }
 
-// Navigation Store - Track active selection (agent OR nav item)
+// Navigation Store - Track active selection (home, agent, OR nav item)
 interface NavigationState {
-  activeType: 'agent' | 'nav' | null
+  activeType: 'home' | 'agent' | 'nav' | null
   activeId: string | null
-  setActive: (type: 'agent' | 'nav' | null, id: string | null) => void
+  setActive: (type: 'home' | 'agent' | 'nav' | null, id: string | null) => void
 }
 
 export const useNavigationStore = create<NavigationState>((set) => ({

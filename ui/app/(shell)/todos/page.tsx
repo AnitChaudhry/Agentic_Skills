@@ -4,15 +4,44 @@ import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useTodoStore } from '@/lib/store'
 import { Input, Button, Card } from '@/components/ui'
-import { CheckCircle2, Circle, Plus } from 'lucide-react'
+import { CheckCircle2, Circle, Plus, Flame, Clock } from 'lucide-react'
+
+interface ChallengeTask {
+  id: string
+  title: string
+  text: string
+  challengeId: string
+  challengeName: string
+  day: number
+  dayTitle: string
+  status: string
+  completed: boolean
+  duration: number
+  priority: string
+}
 
 export default function TodosPage() {
   const { todos, loadTodos, addTodo, toggleTodo } = useTodoStore()
   const [newTodoTitle, setNewTodoTitle] = useState('')
+  const [challengeTasks, setChallengeTasks] = useState<ChallengeTask[]>([])
+  const [loadingChallenges, setLoadingChallenges] = useState(true)
 
   useEffect(() => {
     loadTodos()
+    loadChallengeTasks()
   }, [])
+
+  const loadChallengeTasks = async () => {
+    try {
+      const res = await fetch('/api/todos/from-challenges')
+      const data = await res.json()
+      setChallengeTasks(data.tasks || [])
+    } catch (error) {
+      console.error('Failed to load challenge tasks:', error)
+    } finally {
+      setLoadingChallenges(false)
+    }
+  }
 
   const handleAddTodo = async () => {
     if (!newTodoTitle.trim()) return
@@ -236,6 +265,100 @@ export default function TodosPage() {
                     <TodoItem key={todo.id} todo={todo} showDate />
                   ))}
               </div>
+            </div>
+          )}
+
+          {/* Challenge Tasks Section */}
+          {!loadingChallenges && challengeTasks.length > 0 && (
+            <div className="mt-8 pt-8 border-t border-oa-border">
+              <div className="flex items-center gap-2 mb-6">
+                <Flame className="w-5 h-5 text-orange-500" />
+                <h2 className="text-xl font-semibold text-oa-text-primary">
+                  Challenge Tasks
+                </h2>
+                <span className="text-sm text-oa-text-secondary ml-2">
+                  {challengeTasks.filter(t => t.completed).length}/{challengeTasks.length} completed
+                </span>
+              </div>
+
+              {/* Group by challenge */}
+              {Object.entries(
+                challengeTasks.reduce((acc, task) => {
+                  if (!acc[task.challengeId]) {
+                    acc[task.challengeId] = {
+                      name: task.challengeName,
+                      days: {}
+                    }
+                  }
+                  if (!acc[task.challengeId].days[task.day]) {
+                    acc[task.challengeId].days[task.day] = {
+                      title: task.dayTitle,
+                      tasks: []
+                    }
+                  }
+                  acc[task.challengeId].days[task.day].tasks.push(task)
+                  return acc
+                }, {} as Record<string, { name: string; days: Record<number, { title: string; tasks: ChallengeTask[] }> }>)
+              ).map(([challengeId, challenge]) => (
+                <div key={challengeId} className="mb-6">
+                  <h3 className="text-lg font-medium text-oa-accent mb-3">
+                    {challenge.name}
+                  </h3>
+                  {Object.entries(challenge.days).slice(0, 3).map(([dayNum, day]) => (
+                    <div key={dayNum} className="mb-4 ml-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm font-medium text-oa-text-primary">
+                          Day {dayNum}: {day.title}
+                        </span>
+                        <span className="text-xs text-oa-text-secondary">
+                          ({day.tasks.filter(t => t.completed).length}/{day.tasks.length})
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        {day.tasks.map((task) => (
+                          <motion.div
+                            key={task.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                          >
+                            <Card className="flex items-center gap-3 p-3 hover:border-oa-accent/30 transition-colors">
+                              <div className="flex-shrink-0">
+                                {task.completed ? (
+                                  <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                ) : (
+                                  <Circle className="w-5 h-5 text-oa-text-secondary" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className={`text-sm ${task.completed ? 'line-through text-oa-text-secondary' : 'text-oa-text-primary'}`}>
+                                  {task.title}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <Clock className="w-3 h-3 text-oa-text-secondary" />
+                                <span className="text-xs text-oa-text-secondary">{task.duration}m</span>
+                              </div>
+                              <div className={`text-xs px-2 py-0.5 rounded ${
+                                task.priority === 'high' ? 'bg-red-500/10 text-red-500' :
+                                task.priority === 'medium' ? 'bg-yellow-500/10 text-yellow-500' :
+                                'bg-green-500/10 text-green-500'
+                              }`}>
+                                {task.priority}
+                              </div>
+                            </Card>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {loadingChallenges && (
+            <div className="text-center text-oa-text-secondary py-4">
+              Loading challenge tasks...
             </div>
           )}
         </div>

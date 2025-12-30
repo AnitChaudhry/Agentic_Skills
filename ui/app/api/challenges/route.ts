@@ -3,16 +3,61 @@ import fs from 'fs/promises'
 import path from 'path'
 import { DATA_DIR, PATHS, getProfilePaths } from '@/lib/paths'
 
+// Parse challenge.md file to extract metadata
+function parseChallengeMd(content: string, id: string) {
+  const lines = content.split('\n')
+  const data: Record<string, any> = { id }
+
+  // Extract name from first heading
+  const titleMatch = content.match(/^#\s+(.+)$/m)
+  if (titleMatch) data.name = titleMatch[1].trim()
+
+  // Extract key-value pairs like "- **Key:** Value"
+  for (const line of lines) {
+    const match = line.match(/^-\s*\*\*(.+?):\*\*\s*(.+)$/i)
+    if (match) {
+      const key = match[1].toLowerCase().replace(/\s+/g, '_')
+      let value = match[2].trim()
+
+      // Parse special values
+      if (value.match(/^\d+$/)) value = parseInt(value) as any
+      if (value === 'None' || value === 'none') value = null as any
+
+      data[key] = value
+    }
+  }
+
+  // Extract goal from ## Goal section
+  const goalMatch = content.match(/##\s*Goal\n+([^\n#]+)/i)
+  if (goalMatch) data.goal = goalMatch[1].trim()
+
+  return data
+}
+
+// Count completed days from days/ folder
+async function countCompletedDays(daysDir: string): Promise<{ completed: number, total: number }> {
+  try {
+    const files = await fs.readdir(daysDir)
+    const dayFiles = files.filter(f => f.endsWith('.md'))
+    let completed = 0
+
+    for (const file of dayFiles) {
+      const content = await fs.readFile(path.join(daysDir, file), 'utf-8')
+      if (content.includes('Status: completed') || content.includes('Completed:** Yes')) {
+        completed++
+      }
+    }
+
+    return { completed, total: dayFiles.length }
+  } catch {
+    return { completed: 0, total: 0 }
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
-    // Get active profile ID from header or query param
-    const { searchParams } = new URL(request.url)
-    const profileId = searchParams.get('profileId') || request.headers.get('X-Profile-Id')
-
-    // Use profile-specific path if profileId provided, otherwise fall back to legacy
-    const challengesDir = profileId
-      ? getProfilePaths(profileId).challenges
-      : PATHS.challenges
+    // Always use global challenges directory (data/challenges)
+    const challengesDir = PATHS.challenges
 
     // Ensure directory exists
     await fs.mkdir(challengesDir, { recursive: true })
@@ -23,47 +68,90 @@ export async function GET(request: NextRequest) {
     for (const dir of dirs) {
       if (dir.isDirectory()) {
         try {
-          const configPath = path.join(challengesDir, dir.name, 'challenge-config.json')
-          const configContent = await fs.readFile(configPath, 'utf-8')
-          const config = JSON.parse(configContent)
+          const challengeDir = path.join(challengesDir, dir.name)
 
-          // Calculate progress (days completed / total days)
-          const startDate = new Date(config.start_date || config.startDate)
-          const endDate = new Date(config.end_date || config.targetDate)
-          const today = new Date()
+          // Try MD format first (new format)
+          const mdPath = path.join(challengeDir, 'challenge.md')
+          const jsonPath = path.join(challengeDir, 'challenge-config.json')
+
+          let config: any = null
+
+          try {
+            // Try MD format
+            const mdContent = await fs.readFile(mdPath, 'utf-8')
+            config = parseChallengeMd(mdContent, dir.name)
+          } catch {
+            // Fall back to JSON format
+            try {
+              const jsonContent = await fs.readFile(jsonPath, 'utf-8')
+              config = JSON.parse(jsonContent)
+            } catch {
+              console.error(`No challenge file found in ${dir.name}`)
+              continue
+            }
+          }
+
+          // Count completed days (check both 'days' and 'daily' folders)
+          const daysDir = path.join(challengeDir, 'days')
+          const dailyDir = path.join(challengeDir, 'daily')
+          let daysFolderExists = false
+          let actualDaysDir = daysDir
+
+          try {
+            await fs.access(daysDir)
+            daysFolderExists = true
+          } catch {
+            try {
+              await fs.access(dailyDir)
+              actualDaysDir = dailyDir
+              daysFolderExists = true
+            } catch {}
+          }
+
+          const { completed: completedDays, total: totalDayFiles } = daysFolderExists
+            ? await countCompletedDays(actualDaysDir)
+            : { completed: 0, total: 0 }
+
+          // Calculate progress
+          const startDate = new Date(config.start_date || config.startDate || new Date())
+          const endDate = new Date(config.target_date || config.end_date || config.targetDate || Date.now() + 30*24*60*60*1000)
           const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
-          const daysElapsed = Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+
+          // Use existing progress if available, otherwise calculate
           const progress = config.progress !== undefined
             ? config.progress
-            : Math.min(Math.round((daysElapsed / totalDays) * 100), 100)
+            : (totalDays > 0 ? Math.min(Math.round((completedDays / totalDays) * 100), 100) : 0)
 
-          // Build proper streak object from config
+          // Build streak object - use existing streak data if available
           const streakData = config.streak || {}
+          const currentStreak = streakData.current || parseInt(config.current) || 0
+          const bestStreak = streakData.best || parseInt(config.best) || 0
           const streak = {
             id: `streak-${config.id}`,
             challengeId: config.id,
-            current: streakData.current || 0,
-            best: streakData.best || streakData.longest || 0,
-            lastCheckin: streakData.lastCheckin || null,
+            current: currentStreak,
+            best: bestStreak,
+            lastCheckin: streakData.lastCheckin || config.last_check_in || config.lastCheckin || null,
             missedDays: streakData.missedDays || 0,
             graceUsed: streakData.graceUsed || 0
           }
 
           challenges.push({
-            id: config.id,
-            name: config.name,
-            type: config.type,
-            goal: config.goal,
+            id: config.id || dir.name,
+            name: config.name || dir.name,
+            type: config.type || 'custom',
+            goal: config.goal || '',
             agent: config.agent || 'accountability-coach',
             startDate: config.start_date || config.startDate,
-            targetDate: config.end_date || config.targetDate,
+            targetDate: config.target_date || config.end_date || config.targetDate,
             status: config.status || 'active',
             streak,
             progress,
-            totalDays: totalDays > 0 ? totalDays : 30,  // Include total days for the challenge
+            totalDays: totalDays > 0 ? totalDays : 30,
+            completedDays,
             punishments: config.punishments || [],
-            gracePeriod: config.grace_period || config.gracePeriod || 24,
-            dailyHours: config.daily_hours || config.dailyHours || 1,
+            gracePeriod: parseInt(config.grace_period) || parseInt(config.gracePeriod) || 24,
+            dailyHours: parseInt(config.daily_hours) || parseInt(config.dailyHours) || 1,
             availableSlots: config.available_slots || config.availableSlots || [],
             milestones: config.milestones || []
           })
@@ -97,83 +185,87 @@ export async function POST(request: NextRequest) {
       gracePeriod,
     } = body
 
-    // Get active profile ID from header or query param
-    const { searchParams } = new URL(request.url)
-    const profileId = searchParams.get('profileId') || request.headers.get('X-Profile-Id')
+    // Always use global challenges directory
+    const challengesDir = PATHS.challenges
+    const challengeId = id || name.toLowerCase().replace(/\s+/g, '-')
+    const challengeDir = path.join(challengesDir, challengeId)
+    const daysDir = path.join(challengeDir, 'days')
 
-    // Use profile-specific path if profileId provided, otherwise fall back to legacy
-    const challengesDir = profileId
-      ? getProfilePaths(profileId).challenges
-      : PATHS.challenges
-    const challengeDir = path.join(challengesDir, id)
+    // Create challenge and days directories
+    await fs.mkdir(daysDir, { recursive: true })
 
-    // Create challenge directory
-    await fs.mkdir(challengeDir, { recursive: true })
+    // Calculate total days
+    const start = new Date(startDate || new Date())
+    const end = new Date(targetDate || Date.now() + 30*24*60*60*1000)
+    const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
 
-    // Create challenge config
-    const config = {
-      id,
-      name,
-      type,
-      agent,
-      goal,
-      start_date: startDate,
-      end_date: targetDate,
-      daily_hours: dailyHours,
-      available_slots: availableSlots,
-      punishments: punishments || [],
-      grace_period: gracePeriod || 0,
-      status: 'active',
-      created_at: new Date().toISOString(),
-    }
+    // Create challenge.md (main config in MD format)
+    const challengeMd = `# ${name}
 
-    await fs.writeFile(
-      path.join(challengeDir, 'challenge-config.json'),
-      JSON.stringify(config, null, 2),
-      'utf-8'
-    )
+## Overview
+- **ID:** ${challengeId}
+- **Type:** ${type || 'custom'}
+- **Status:** active
+- **Start Date:** ${start.toISOString().split('T')[0]}
+- **Target Date:** ${end.toISOString().split('T')[0]}
+- **Daily Hours:** ${dailyHours || 1}
+- **Agent:** ${agent || 'accountability-coach'}
 
-    // Create initial plan.md
-    await fs.writeFile(
-      path.join(challengeDir, 'plan.md'),
-      `# ${name}\n\n## Goal\n${goal}\n\n## Plan\n\n(Plan will be generated by AI based on your goal and timeline)\n`,
-      'utf-8'
-    )
+## Goal
+${goal || 'No goal specified'}
 
-    // Create activity-log.md (daily check-ins and activities)
-    await fs.writeFile(
-      path.join(challengeDir, 'activity-log.md'),
-      `# Activity Log - ${name}\n\nStarted: ${startDate}\n\n## Daily Activities\n\n`,
-      'utf-8'
-    )
+## Streak
+- **Current:** 0 days
+- **Best:** 0 days
+- **Last Check-in:** None
 
-    // Create progress.md (overall progress tracking)
-    await fs.writeFile(
-      path.join(challengeDir, 'progress.md'),
-      `# Progress - ${name}\n\nStarted: ${startDate}\nTarget: ${targetDate}\n\n## Overall Progress\n\n**Current Status:** Just started\n**Progress:** 0%\n**Streak:** 0 days 🔥\n\n## Milestones\n\n- [ ] Week 1 Complete\n- [ ] Week 2 Complete\n- [ ] First Major Milestone\n- [ ] Halfway Point\n- [ ] Final Goal Achieved\n\n## Weekly Summary\n\n`,
-      'utf-8'
-    )
+## Progress
+- **Overall:** 0%
+- **Days Completed:** 0/${totalDays}
 
-    // Create backlog.md (pending tasks and ideas)
-    await fs.writeFile(
-      path.join(challengeDir, 'backlog.md'),
-      `# Backlog - ${name}\n\nLast Updated: ${new Date().toISOString().split('T')[0]}\n\n## Pending Tasks\n\n### 🔴 High Priority (Do This Week)\n- [ ] Get started with ${name}\n\n### 🟡 Medium Priority (Next 2 Weeks)\n\n### 🟢 Low Priority (Nice to Have)\n\n## Ideas & Future Projects\n\n## Resources to Explore\n\n## Blockers to Resolve\n\n## Completed This Week ✅\n`,
-      'utf-8'
-    )
+## Plan
+(Plan will be generated based on your goal and timeline)
 
-    // Create punishment.json (punishment configuration)
-    const punishmentConfig = {
-      punishments: punishments || [],
-      active: punishments && punishments.length > 0,
-      grace_period_hours: gracePeriod || 24,
-      triggered: [],
-      history: []
-    }
-    await fs.writeFile(
-      path.join(challengeDir, 'punishment.json'),
-      JSON.stringify(punishmentConfig, null, 2),
-      'utf-8'
-    )
+## Milestones
+- [ ] Week 1 Complete
+- [ ] Week 2 Complete
+- [ ] Halfway Point
+- [ ] Final Goal Achieved
+
+## Notes
+Created: ${new Date().toISOString()}
+`
+
+    await fs.writeFile(path.join(challengeDir, 'challenge.md'), challengeMd, 'utf-8')
+
+    // Create first day file
+    const today = new Date().toISOString().split('T')[0]
+    const dayMd = `# Day 1 - ${today}
+
+## Status: pending
+
+## Today's Focus
+Getting started with ${name}
+
+## Tasks
+- [ ] Review the challenge goal
+- [ ] Create initial plan
+- [ ] Start first task
+
+## Notes
+
+
+## Check-in
+- **Completed:** No
+- **Time Spent:** 0 hours
+- **Mood:**
+- **Blockers:** None
+
+## Reflection
+
+`
+
+    await fs.writeFile(path.join(daysDir, `${today}.md`), dayMd, 'utf-8')
 
     // Update registry
     const registryPath = path.join(DATA_DIR, '.registry', 'challenges.json')
@@ -187,7 +279,7 @@ export async function POST(request: NextRequest) {
 
     registry.challenges = registry.challenges || []
     registry.challenges.push({
-      id,
+      id: challengeId,
       name,
       streak: 0,
       last_checkin: null,
@@ -196,61 +288,10 @@ export async function POST(request: NextRequest) {
 
     await fs.writeFile(registryPath, JSON.stringify(registry, null, 2), 'utf-8')
 
-    // Log to index.md
-    try {
-      await fetch(`${request.nextUrl.origin}/api/system/index`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'challenge_created',
-          data: {
-            id,
-            name,
-            type,
-            progress: 0,
-            streak: 0,
-            punishment: punishments?.length > 0 ? punishments[0].consequence.type : 'none',
-          },
-        }),
-      })
-
-      // Also log files created
-      await fetch(`${request.nextUrl.origin}/api/system/index`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'file_created',
-          data: {
-            filePath: `challenges/${id}/challenge-config.json`,
-            purpose: 'Challenge configuration',
-            created: new Date().toISOString(),
-            modified: new Date().toISOString(),
-          },
-        }),
-      })
-
-      await fetch(`${request.nextUrl.origin}/api/system/index`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'file_created',
-          data: {
-            filePath: `challenges/${id}/plan.md`,
-            purpose: 'Challenge plan',
-            created: new Date().toISOString(),
-            modified: new Date().toISOString(),
-          },
-        }),
-      })
-    } catch (error) {
-      console.error('Failed to update index.md:', error)
-      // Don't fail the request if index update fails
-    }
-
     return NextResponse.json({
       success: true,
       challenge: {
-        id,
+        id: challengeId,
         name,
         type,
         streak: 0,

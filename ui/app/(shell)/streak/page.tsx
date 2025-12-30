@@ -16,12 +16,12 @@ export default function StreakPage() {
 
   useEffect(() => {
     loadChallenges()
-  }, [profileId])
+  }, [])
 
   const loadChallenges = async () => {
     try {
-      const url = addProfileId('/api/challenges', profileId)
-      const res = await fetch(url)
+      // Use global challenges endpoint (not profile-specific)
+      const res = await fetch('/api/challenges')
       const data = await res.json()
       setChallenges(data.challenges || [])
     } catch (error) {

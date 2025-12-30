@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastBuild": "2025-12-29T10:01:31.055Z",
+  "lastBuild": "2025-12-30T07:16:41.242Z",
   "profiles": {
     "anit-gmail-co": {
       "id": "anit-gmail-co",
@@ -10,7 +10,32 @@
       "chats": "C:\\Users\\Anit\\Downloads\\OpenAnalyst Accountability coach\\data\\profiles\\anit-gmail-co\\chats"
     }
   },
-  "agents": {},
+  "agents": {
+    "accountability-coach": {
+      "id": "accountability-coach",
+      "name": "Accountability Coach",
+      "description": "Your personal accountability partner who helps you stay on track with your goals",
+      "avatar": "coach",
+      "capabilities": [
+        "challenge-creation",
+        "daily-checkin",
+        "progress-tracking",
+        "motivation",
+        "planning"
+      ],
+      "personality": {
+        "tone": "encouraging",
+        "style": "supportive but honest"
+      },
+      "skills": [
+        "streak",
+        "daily-checkin",
+        "smart-scheduler",
+        "nanobanana-skill"
+      ],
+      "isDefault": true
+    }
+  },
   "stats": {
     "totalProfiles": 1,
     "totalChallenges": 0,

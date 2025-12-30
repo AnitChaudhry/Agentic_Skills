@@ -29,23 +29,29 @@ export function ChatGreeting({ agentName }: ChatGreetingProps) {
 
   const getSubtitle = () => {
     if (agentName) {
-      return `Chat with ${agentName} - All conversations are agent-specific`
+      return `Your personal ${agentName} - powered by Claude`
     }
-    return 'Unified chat - Talk about anything across all your agents'
+    return 'Ask anything - access all users, challenges, and data'
   }
 
   return (
     <div className="text-center mb-8">
       <h1 className="text-5xl font-light italic text-oa-text-primary mb-2">
-        Welcome back, {userName || 'Anit'}
+        {agentName ? `Hey, ${userName || 'there'}` : `Welcome to OpenAnalyst`}
       </h1>
       <p className="text-sm text-oa-text-secondary">
         {getSubtitle()}
       </p>
+      {!agentName && (
+        <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-oa-bg-secondary border border-oa-border rounded-full text-xs">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span className="text-oa-text-primary">Unified Dashboard - All data accessible</span>
+        </div>
+      )}
       {agentName && (
         <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 bg-oa-bg-secondary border border-oa-border rounded-full text-xs">
           <div className="w-2 h-2 bg-oa-accent rounded-full"></div>
-          <span className="text-oa-text-primary">Agent Context: {agentName}</span>
+          <span className="text-oa-text-primary">{agentName} Mode</span>
         </div>
       )}
     </div>

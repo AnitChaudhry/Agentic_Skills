@@ -16,49 +16,63 @@ export default function SchedulePage() {
   const loadEvents = async () => {
     try {
       setLoading(true)
-      // Load todos and challenges to populate calendar
+
+      // Load challenge tasks from MD files
+      const challengeTasksRes = await fetch('/api/todos/from-challenges')
+      const challengeTasksData = await challengeTasksRes.json()
+      const challengeTasks = challengeTasksData.tasks || []
+
+      // Load regular todos
       const todosUrl = addProfileId('/api/todos', profileId)
-      const challengesUrl = addProfileId('/api/challenges', profileId)
-      const [todosRes, challengesRes] = await Promise.all([
-        fetch(todosUrl),
-        fetch(challengesUrl),
-      ])
-
+      const todosRes = await fetch(todosUrl)
       const todosData = await todosRes.json()
-      const challengesData = await challengesRes.json()
-
-      // Handle both array and object responses
       const todos = Array.isArray(todosData) ? todosData : []
-      const challenges = Array.isArray(challengesData) ? challengesData : (challengesData.challenges || [])
 
-      // Convert todos to calendar events
+      // Load challenges for metadata
+      const challengesRes = await fetch('/api/challenges')
+      const challengesData = await challengesRes.json()
+      const challenges = challengesData.challenges || []
+
+      // Convert challenge tasks to calendar events
+      // Group by day and create daily events
+      const today = new Date()
+      const challengeEvents = challengeTasks.map((task: any, index: number) => {
+        // Calculate date based on challenge start + day number
+        const challenge = challenges.find((c: any) => c.id === task.challengeId)
+        const startDate = challenge?.startDate ? new Date(challenge.startDate) : today
+        const taskDate = new Date(startDate)
+        taskDate.setDate(taskDate.getDate() + (task.day - 1))
+
+        return {
+          id: task.id,
+          title: task.title,
+          date: taskDate.toISOString().split('T')[0],
+          time: `${9 + Math.floor(index % 8)}:00`, // Spread across day
+          duration: task.duration,
+          status: task.completed ? 'completed' : 'pending',
+          type: 'challenge-task' as const,
+          challengeName: task.challengeName,
+          challengeId: task.challengeId,
+          day: task.day,
+          dayTitle: task.dayTitle,
+          priority: task.priority,
+        }
+      })
+
+      // Convert regular todos to calendar events
       const todoEvents = todos.map((todo: any) => ({
         id: todo.id,
         title: todo.text || todo.title,
         date: todo.dueDate || new Date().toISOString().split('T')[0],
         time: todo.time,
-        duration: todo.duration,
-        // Handle both boolean completed and string status
+        duration: todo.duration || 30,
         status: todo.status || (todo.completed === true ? 'completed' : 'pending'),
         type: 'todo' as const,
         challengeName: todo.challengeId,
         priority: todo.priority,
       }))
 
-      // Convert challenge sessions to events
-      const challengeEvents = challenges.flatMap((challenge: any) =>
-        (challenge.sessions || []).map((session: any) => ({
-          id: session.id,
-          title: `${challenge.name} Session`,
-          date: session.date,
-          time: session.time,
-          status: session.status || 'pending',
-          type: 'session',
-          challengeName: challenge.name,
-        }))
-      )
-
-      setEvents([...todoEvents, ...challengeEvents])
+      setEvents([...challengeEvents, ...todoEvents])
     } catch (error) {
       console.error('Failed to load events:', error)
       setEvents([])

@@ -1,14 +1,19 @@
 'use client'
 
 import React, { useEffect } from 'react'
-import { useAgentStore, useTodoStore } from '@/lib/store'
+import { useRouter, usePathname } from 'next/navigation'
+import { useAgentStore, useTodoStore, useNavigationStore } from '@/lib/store'
 import { AgentCard } from '@/components/sidebar/AgentCard'
 import { AddAgentButton } from '@/components/sidebar/AddAgentButton'
 import { NavSection } from '@/components/sidebar/NavSection'
+import { Home } from 'lucide-react'
 
 export function LeftSidebar() {
+  const router = useRouter()
+  const pathname = usePathname()
   const { agents, activeAgentId, setActiveAgent, loadAgents } = useAgentStore()
   const { todos, loadTodos } = useTodoStore()
+  const { setActive } = useNavigationStore()
 
   useEffect(() => {
     loadAgents()
@@ -16,6 +21,12 @@ export function LeftSidebar() {
   }, [])
 
   const pendingTodos = Array.isArray(todos) ? todos.filter(t => t.status !== 'completed').length : 0
+  const isHome = pathname === '/app' || pathname === '/'
+
+  const handleHomeClick = () => {
+    setActive('home', 'unified')
+    router.push('/app')
+  }
 
   return (
     <div className="flex flex-col h-full bg-oa-bg-primary">
@@ -27,9 +38,24 @@ export function LeftSidebar() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-oa-text-primary tracking-tight">OpenAnalyst</h1>
-            <p className="text-[10px] text-oa-text-secondary uppercase tracking-wide">Accountability Coach</p>
+            <p className="text-[10px] text-oa-text-secondary uppercase tracking-wide">Powered by Claude</p>
           </div>
         </div>
+      </div>
+
+      {/* Home Button */}
+      <div className="px-3 py-3 border-b border-oa-border">
+        <button
+          onClick={handleHomeClick}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+            isHome
+              ? 'bg-oa-accent text-white shadow-md'
+              : 'text-oa-text-primary hover:bg-oa-bg-secondary'
+          }`}
+        >
+          <Home size={18} />
+          <span>Home</span>
+        </button>
       </div>
 
       {/* Agents Section */}

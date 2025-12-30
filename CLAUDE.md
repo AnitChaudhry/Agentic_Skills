@@ -1,32 +1,41 @@
-# Claude Code Integration Guide - v2.0 (Automated Startup)
+# OpenAnalyst - Powered by Claude
 
-## 🚀 Quick Start - One Command!
+## 🧠 Architecture
+
+**OpenAnalyst is the accountability coach app. Claude powers the AI behind it.**
+
+The user sees the OpenAnalyst chat UI. Behind the scenes:
+- Messages come via WebSocket
+- Claude generates intelligent responses using cached user data
+- Responses stream back to the UI in real-time
+- User experiences "OpenAnalyst" as their coach (powered by Claude)
+
+```
+User (OpenAnalyst UI) → WebSocket → Claude AI → Response → User sees coach reply
+```
+
+---
+
+## 🚀 Quick Start
 
 ### When User Says: "Start my app"
 
-**First, kill processes on ports 3000 and 8765 (prevents port conflicts):**
-```bash
-# Find PIDs on the ports
-netstat -ano | findstr ":8765 :3000"
-
-# Kill by PID (use //F and //PID in git bash)
-taskkill //F //PID <pid1> && taskkill //F //PID <pid2>
-```
-
-**Then start the app:**
+**Tell the user to run in THEIR terminal:**
 ```bash
 npm start
 ```
 
-That's it! Everything starts automatically:
-- ✅ WebSocket Server (ws://localhost:8765)
-- ✅ Fast Cache System (0ms queries)
-- ✅ Claude Code Listener (YOU!)
-- ✅ Next.js UI (http://localhost:3000)
+If ports are busy, they should first run:
+```bash
+netstat -ano | findstr ":8765 :3000"
+taskkill /F /PID <pid1>
+taskkill /F /PID <pid2>
+```
 
 **Then tell user:**
 ```
-✅ Your app is ready at http://localhost:3000
+Your app is ready at http://localhost:3000
+Messages are handled automatically by Claude Code.
 ```
 
 ---
@@ -352,19 +361,22 @@ npm start
 ## 🎉 Summary
 
 **User:** "start my app"
-**YOU:**
-1. `netstat -ano | findstr ":8765 :3000"` (find PIDs)
-2. `taskkill //F //PID <pid1> && taskkill //F //PID <pid2>` (kill them)
-3. `npm start`
-**Result:** Everything works automatically!
+**YOU:** Tell user to run `npm start` in their terminal
 
-**Architecture Benefits:**
-- ⚡ 0-2ms queries
-- 🔄 Real-time WebSocket
-- 🤖 All agents supported
-- 💾 Auto-caching
-- 🚀 One command startup
+**How it works:**
+1. User runs `npm start` in their terminal
+2. App starts (WebSocket + UI + Cache)
+3. User opens http://localhost:3000
+4. User sends message in chat
+5. **YOU (Claude Code) automatically receive and respond**
+6. User sees AI response in real-time
+
+**Key Points:**
+- Profile ID is detected dynamically (works for any user)
+- Responses are generated instantly (0-2ms) from cache
+- Branding: "OpenAnalyst powered by Claude"
+- No manual intervention needed - auto-response is enabled
 
 ---
 
-**You are the AI backend. Everything is automatic. Just run `npm start` and respond to messages!** 🎯
+**OpenAnalyst is the product. Claude is the brain powering it.**

@@ -4,7 +4,16 @@
 
 ### When User Says: "Start my app"
 
-**Run this single command:**
+**First, kill processes on ports 3000 and 8765 (prevents port conflicts):**
+```bash
+# Find PIDs on the ports
+netstat -ano | findstr ":8765 :3000"
+
+# Kill by PID (use //F and //PID in git bash)
+taskkill //F //PID <pid1> && taskkill //F //PID <pid2>
+```
+
+**Then start the app:**
 ```bash
 npm start
 ```
@@ -326,11 +335,15 @@ npm run query stats
 npm start
 ```
 
-### WebSocket Issues?
+### WebSocket Issues / Port 8765 In Use?
 ```bash
-# Check port 8765
-netstat -an | findstr 8765
-# Restart if needed
+# Find PIDs on ports
+netstat -ano | findstr ":8765 :3000"
+
+# Kill by PID (replace with actual PIDs from above)
+taskkill //F //PID <pid1> && taskkill //F //PID <pid2>
+
+# Then restart
 npm start
 ```
 
@@ -339,7 +352,10 @@ npm start
 ## 🎉 Summary
 
 **User:** "start my app"
-**YOU:** `npm start`
+**YOU:**
+1. `netstat -ano | findstr ":8765 :3000"` (find PIDs)
+2. `taskkill //F //PID <pid1> && taskkill //F //PID <pid2>` (kill them)
+3. `npm start`
 **Result:** Everything works automatically!
 
 **Architecture Benefits:**

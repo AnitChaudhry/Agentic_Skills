@@ -3,19 +3,138 @@ import fs from 'fs/promises'
 import path from 'path'
 import { DATA_DIR, PATHS } from '@/lib/paths'
 
+// Parse agents from agents.md
+function parseAgentsMd(content: string) {
+  const agents: any[] = []
+
+  // Split by agent sections (## AgentName)
+  const sections = content.split(/\n## /).slice(1) // Skip header
+
+  for (const section of sections) {
+    if (section.startsWith('Overview') || section.startsWith('Available')) continue
+
+    const lines = section.split('\n')
+    const name = lines[0].trim()
+    if (!name || name === 'Overview') continue
+
+    const agent: any = { name }
+
+    // Parse key-value pairs
+    for (const line of lines) {
+      const match = line.match(/^-\s*\*\*(.+?):\*\*\s*(.+)$/i)
+      if (match) {
+        const key = match[1].toLowerCase().replace(/\s+/g, '_')
+        agent[key] = match[2].trim()
+      }
+    }
+
+    // Parse capabilities list
+    const capsSection = section.match(/### Capabilities\n([\s\S]*?)(?=\n###|$)/i)
+    if (capsSection) {
+      agent.capabilities = []
+      const capMatches = capsSection[1].matchAll(/^-\s+(.+)$/gm)
+      for (const m of capMatches) {
+        agent.capabilities.push(m[1].trim())
+      }
+    }
+
+    // Parse skills list
+    const skillsSection = section.match(/### Skills\n([\s\S]*?)(?=\n###|$)/i)
+    if (skillsSection) {
+      agent.skills = []
+      const skillMatches = skillsSection[1].matchAll(/^-\s+(.+)$/gm)
+      for (const m of skillMatches) {
+        agent.skills.push(m[1].trim())
+      }
+    }
+
+    if (agent.id) {
+      agents.push(agent)
+    }
+  }
+
+  return agents
+}
+
 export async function GET() {
   try {
-    const agentsFile = PATHS.agents
+    // Try agents.md first, then fall back to agents.json
+    const agentsMdFile = path.join(DATA_DIR, 'agents.md')
+    const agentsJsonFile = PATHS.agents
 
-    // Read agents from file - return empty if doesn't exist
     try {
-      await fs.access(agentsFile)
-      const data = await fs.readFile(agentsFile, 'utf-8')
+      // Try MD file first
+      await fs.access(agentsMdFile)
+      const data = await fs.readFile(agentsMdFile, 'utf-8')
+      const agents = parseAgentsMd(data)
+      if (agents.length > 0) {
+        return NextResponse.json(agents)
+      }
+    } catch {}
+
+    // Fall back to reading from agent folders
+    const agentsDir = path.join(DATA_DIR, 'agents')
+    try {
+      const dirs = await fs.readdir(agentsDir, { withFileTypes: true })
+      const agents = []
+
+      for (const dir of dirs) {
+        if (!dir.isDirectory()) continue
+
+        const agentMdPath = path.join(agentsDir, dir.name, 'agent.md')
+        try {
+          const content = await fs.readFile(agentMdPath, 'utf-8')
+
+          // Parse agent.md
+          const nameMatch = content.match(/^#\s+(.+)$/m)
+          const idMatch = content.match(/ID:\*\*\s*(.+)/i)
+          const descMatch = content.match(/Description:\*\*\s*(.+)/i) || content.match(/## Description\n+([^\n#]+)/i)
+
+          const agent: any = {
+            id: idMatch?.[1]?.trim() || dir.name,
+            name: nameMatch?.[1]?.trim() || dir.name,
+            description: descMatch?.[1]?.trim() || '',
+          }
+
+          // Parse capabilities
+          const capsSection = content.match(/## Capabilities\n([\s\S]*?)(?=\n##|$)/i)
+          if (capsSection) {
+            agent.capabilities = []
+            const capMatches = capsSection[1].matchAll(/^-\s+(.+)$/gm)
+            for (const m of capMatches) {
+              if (!m[1].includes('None')) agent.capabilities.push(m[1].trim())
+            }
+          }
+
+          // Parse skills
+          const skillsSection = content.match(/## Skills\n([\s\S]*?)(?=\n##|$)/i) ||
+                               content.match(/## Assigned Skills\n([\s\S]*?)(?=\n##|$)/i)
+          if (skillsSection) {
+            agent.skills = []
+            const skillMatches = skillsSection[1].matchAll(/^-\s+(.+)$/gm)
+            for (const m of skillMatches) {
+              if (!m[1].includes('None') && !m[1].includes('No skills')) {
+                agent.skills.push(m[1].trim())
+              }
+            }
+          }
+
+          agents.push(agent)
+        } catch {}
+      }
+
+      if (agents.length > 0) {
+        return NextResponse.json(agents)
+      }
+    } catch {}
+
+    // Final fallback to JSON
+    try {
+      await fs.access(agentsJsonFile)
+      const data = await fs.readFile(agentsJsonFile, 'utf-8')
       const agents = JSON.parse(data)
       return NextResponse.json(agents)
     } catch {
-      // No agents file - return empty array
-      // User should create agents through the UI or by adding agents.json
       return NextResponse.json([])
     }
   } catch (error) {

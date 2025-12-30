@@ -3,6 +3,38 @@ import fs from 'fs/promises'
 import path from 'path'
 import { PATHS, getProfilePaths } from '@/lib/paths'
 
+// Parse todos from active.md
+function parseTodosMd(content: string) {
+  const todos: any[] = []
+
+  // Match todo items: - [x] or - [ ] followed by text
+  const todoMatches = content.matchAll(/- \[([ xX])\]\s*\*\*(.+?)\*\*\n([\s\S]*?)(?=\n- \[|$)/g)
+
+  for (const match of todoMatches) {
+    const completed = match[1].toLowerCase() === 'x'
+    const title = match[2].trim()
+    const details = match[3]
+
+    // Parse details
+    const priorityMatch = details.match(/Priority:\s*(\w+)/i)
+    const createdMatch = details.match(/Created:\s*(.+)/i)
+    const challengeMatch = details.match(/Challenge:\s*(.+)/i)
+
+    todos.push({
+      id: `todo-${todos.length + 1}`,
+      title,
+      text: title,
+      status: completed ? 'completed' : 'pending',
+      completed,
+      priority: priorityMatch?.[1]?.toLowerCase() || 'medium',
+      createdAt: createdMatch?.[1]?.trim() || new Date().toISOString(),
+      challengeId: challengeMatch?.[1]?.trim() || null,
+    })
+  }
+
+  return todos
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Get active profile ID from header or query param
@@ -11,10 +43,21 @@ export async function GET(request: NextRequest) {
 
     // Use profile-specific path if profileId provided, otherwise fall back to legacy
     const todosDir = profileId ? getProfilePaths(profileId).todos : PATHS.todos
-    const activeFile = path.join(todosDir, 'active.json')
 
+    // Try MD file first
+    const mdFile = path.join(todosDir, 'active.md')
     try {
-      const data = await fs.readFile(activeFile, 'utf-8')
+      const data = await fs.readFile(mdFile, 'utf-8')
+      const todos = parseTodosMd(data)
+      if (todos.length > 0) {
+        return NextResponse.json(todos)
+      }
+    } catch {}
+
+    // Fall back to JSON
+    const jsonFile = path.join(todosDir, 'active.json')
+    try {
+      const data = await fs.readFile(jsonFile, 'utf-8')
       return NextResponse.json(JSON.parse(data))
     } catch {
       return NextResponse.json([])

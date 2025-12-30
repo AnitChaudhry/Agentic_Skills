@@ -27,8 +27,8 @@ export default function Home() {
             // No active profile selected - show profile selector
             router.push('/profiles')
           } else {
-            // Active profile exists - go to main app
-            router.push('/app')
+            // Active profile exists - go to streaks/challenges page (main dashboard)
+            router.push('/streak')
           }
         }
       } catch (error) {

@@ -337,47 +337,102 @@ export default function StreakDetailPage() {
             </motion.div>
           )}
 
-          {/* Activity History */}
+          {/* Daily Tasks - Show all days with their tasks */}
           {activityHistory.length > 0 && (
             <motion.div
               className="bg-oa-bg-secondary border border-oa-border rounded-lg p-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
+              transition={{ delay: 0.7 }}
             >
               <h2 className="text-lg font-semibold text-oa-text-primary mb-4">
-                Activity History
+                Daily Tasks ({activityHistory.length} days)
               </h2>
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {activityHistory.slice().reverse().map((activity, idx) => (
-                  <div key={idx} className="border-l-2 border-oa-border pl-4 py-2">
-                    <div className="flex items-center justify-between mb-1">
+              <div className="space-y-4 max-h-[600px] overflow-y-auto">
+                {activityHistory.map((activity, idx) => (
+                  <div
+                    key={idx}
+                    className={`border rounded-lg p-4 ${
+                      activity.status === 'completed'
+                        ? 'border-green-500/30 bg-green-500/5'
+                        : activity.status === 'missed'
+                        ? 'border-red-500/30 bg-red-500/5'
+                        : 'border-oa-border'
+                    }`}
+                  >
+                    {/* Day Header */}
+                    <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-oa-text-primary">
+                        <span className="text-base font-semibold text-oa-text-primary">
                           Day {activity.day}
                         </span>
-                        <span className="text-xs text-oa-text-secondary">
-                          {new Date(activity.date).toLocaleDateString()}
-                        </span>
+                        {activity.title && activity.title !== `Day ${activity.day}` && (
+                          <span className="text-sm text-oa-text-secondary">
+                            - {activity.title}
+                          </span>
+                        )}
                       </div>
-                      {activity.status === 'completed' ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                      ) : activity.status === 'missed' ? (
-                        <XCircle className="w-4 h-4 text-red-500" />
-                      ) : (
-                        <Clock className="w-4 h-4 text-yellow-500" />
-                      )}
+                      <div className="flex items-center gap-2">
+                        {activity.status === 'completed' ? (
+                          <span className="text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-500 flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" /> Complete
+                          </span>
+                        ) : activity.status === 'missed' ? (
+                          <span className="text-xs px-2 py-1 rounded-full bg-red-500/10 text-red-500 flex items-center gap-1">
+                            <XCircle className="w-3 h-3" /> Missed
+                          </span>
+                        ) : (
+                          <span className="text-xs px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-500 flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> Pending
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    {activity.timeSpent && (
-                      <p className="text-xs text-oa-text-secondary">
-                        Time: {activity.timeSpent}
-                      </p>
+
+                    {/* Topics */}
+                    {activity.topics && activity.topics.length > 0 && (
+                      <div className="mb-3">
+                        <div className="flex flex-wrap gap-1">
+                          {activity.topics.map((topic: string, i: number) => (
+                            <span key={i} className="text-xs px-2 py-0.5 rounded bg-oa-bg-tertiary text-oa-text-secondary">
+                              {topic}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     )}
-                    {activity.streak > 0 && (
-                      <p className="text-xs text-oa-text-secondary flex items-center gap-1">
-                        <Flame className="w-3 h-3 text-orange-500" />
-                        {activity.streak} day{activity.streak !== 1 ? 's' : ''}
-                      </p>
+
+                    {/* Tasks */}
+                    {activity.tasks && activity.tasks.length > 0 && (
+                      <div className="space-y-1.5">
+                        {activity.tasks.map((task: any, i: number) => (
+                          <div key={i} className="flex items-start gap-2">
+                            {task.completed ? (
+                              <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                            ) : (
+                              <div className="w-4 h-4 rounded border border-oa-border mt-0.5 flex-shrink-0" />
+                            )}
+                            <span className={`text-sm ${task.completed ? 'text-oa-text-secondary line-through' : 'text-oa-text-primary'}`}>
+                              {task.text}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Quick Win */}
+                    {activity.quickWin && (
+                      <div className="mt-3 pt-2 border-t border-oa-border">
+                        <span className="text-xs text-oa-text-secondary">Quick Win: </span>
+                        <span className="text-xs text-oa-accent">{activity.quickWin}</span>
+                      </div>
+                    )}
+
+                    {/* Time info */}
+                    {activity.timeSpent && activity.timeSpent !== '0 hours' && (
+                      <div className="mt-2 text-xs text-oa-text-secondary">
+                        Time spent: {activity.timeSpent}
+                      </div>
                     )}
                   </div>
                 ))}

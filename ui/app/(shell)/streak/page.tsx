@@ -3,14 +3,19 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Flame, Trophy, Calendar, TrendingUp } from 'lucide-react'
+import { Flame, Trophy, Calendar, TrendingUp, CheckCircle, Circle, ListTodo } from 'lucide-react'
 import { AnimatedButton } from '@/components/ui/AnimatedButton'
 import type { Challenge } from '@/types/streak'
 import { addProfileId, useProfileId } from '@/lib/useProfileId'
 
+interface ChallengeWithTasks extends Challenge {
+  todaysTasks?: { completed: boolean; text: string }[]
+  totalDayFiles?: number
+}
+
 export default function StreakPage() {
   const router = useRouter()
-  const [challenges, setChallenges] = useState<Challenge[]>([])
+  const [challenges, setChallenges] = useState<ChallengeWithTasks[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const profileId = useProfileId()
 
@@ -23,7 +28,30 @@ export default function StreakPage() {
       // Use global challenges endpoint (not profile-specific)
       const res = await fetch('/api/challenges')
       const data = await res.json()
-      setChallenges(data.challenges || [])
+      const challengeList = data.challenges || []
+
+      // Load today's tasks for each challenge
+      const challengesWithTasks = await Promise.all(
+        challengeList.map(async (challenge: Challenge) => {
+          try {
+            const activityRes = await fetch(`/api/challenges/${challenge.id}/activity-log`)
+            const activityData = await activityRes.json()
+            const activities = activityData.activities || []
+
+            // Get the latest day's tasks (last in array is most recent)
+            const latestDay = activities[activities.length - 1]
+            return {
+              ...challenge,
+              todaysTasks: latestDay?.tasks || [],
+              totalDayFiles: activities.length
+            }
+          } catch {
+            return { ...challenge, todaysTasks: [], totalDayFiles: 0 }
+          }
+        })
+      )
+
+      setChallenges(challengesWithTasks)
     } catch (error) {
       console.error('Failed to load challenges:', error)
     } finally {
@@ -161,11 +189,49 @@ export default function StreakPage() {
 
                 {/* Deadline */}
                 {challenge.targetDate && (
-                  <div className="flex items-center gap-2 text-xs text-oa-text-secondary">
+                  <div className="flex items-center gap-2 text-xs text-oa-text-secondary mb-3">
                     <Calendar className="w-3 h-3" />
                     <span>
                       Due: {new Date(challenge.targetDate).toLocaleDateString()}
                     </span>
+                  </div>
+                )}
+
+                {/* Today's Tasks Preview */}
+                {challenge.todaysTasks && challenge.todaysTasks.length > 0 && (
+                  <div className="border-t border-oa-border pt-3 mt-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <ListTodo className="w-3 h-3 text-oa-text-secondary" />
+                      <span className="text-xs text-oa-text-secondary">
+                        Today's Tasks ({challenge.todaysTasks.filter(t => t.completed).length}/{challenge.todaysTasks.length})
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      {challenge.todaysTasks.slice(0, 3).map((task, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          {task.completed ? (
+                            <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />
+                          ) : (
+                            <Circle className="w-3 h-3 text-oa-text-secondary flex-shrink-0" />
+                          )}
+                          <span className={`text-xs truncate ${task.completed ? 'text-oa-text-secondary line-through' : 'text-oa-text-primary'}`}>
+                            {task.text}
+                          </span>
+                        </div>
+                      ))}
+                      {challenge.todaysTasks.length > 3 && (
+                        <span className="text-xs text-oa-text-secondary">
+                          +{challenge.todaysTasks.length - 3} more tasks
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Total Days */}
+                {challenge.totalDayFiles && challenge.totalDayFiles > 0 && (
+                  <div className="text-xs text-oa-text-secondary mt-2">
+                    {challenge.totalDayFiles} days planned
                   </div>
                 )}
               </motion.div>

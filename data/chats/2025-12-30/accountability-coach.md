@@ -23,3 +23,15 @@ hello
 No profile found. Please set up your profile in Settings first.
 
 ---
+
+## **You** - 12/30/2025, 6:11:11 PM
+
+Hey
+
+---
+
+## **Assistant** - 12/30/2025, 6:11:11 PM
+
+No profile found. Please set up your profile in Settings first.
+
+---

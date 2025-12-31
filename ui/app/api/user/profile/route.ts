@@ -1,12 +1,47 @@
 import { NextResponse } from 'next/server'
 import fs from 'fs/promises'
 import path from 'path'
-import { DATA_DIR, PATHS } from '@/lib/paths'
+import { SHARED_PATHS, getProfilePaths } from '@/lib/paths'
+
+async function getCurrentProfileId(): Promise<string | null> {
+  try {
+    // Read profiles.md to get the current/default profile
+    const profilesMd = await fs.readFile(SHARED_PATHS.profilesMd, 'utf-8')
+    const currentMatch = profilesMd.match(/\*\*Current:\*\*\s*(\S+)/)
+    if (currentMatch) return currentMatch[1]
+
+    // Fallback: get first profile directory
+    const profiles = await fs.readdir(SHARED_PATHS.profiles)
+    const profileDirs = profiles.filter(p => !p.endsWith('.md') && !p.startsWith('.'))
+    if (profileDirs.length > 0) return profileDirs[0]
+  } catch {
+    // profiles.md doesn't exist, try to find any profile
+    try {
+      const profiles = await fs.readdir(SHARED_PATHS.profiles)
+      const profileDirs = profiles.filter(p => !p.endsWith('.md') && !p.startsWith('.'))
+      if (profileDirs.length > 0) return profileDirs[0]
+    } catch {
+      // No profiles directory
+    }
+  }
+  return null
+}
 
 export async function GET() {
   try {
-    const profilePath = path.join(PATHS.profile, 'profile.md')
-    const challengesDir = PATHS.challenges
+    const profileId = await getCurrentProfileId()
+    if (!profileId) {
+      return NextResponse.json({
+        name: 'User',
+        totalStreak: 0,
+        activeChallenges: 0,
+        completedToday: false,
+      })
+    }
+
+    const paths = getProfilePaths(profileId)
+    const profilePath = path.join(paths.profile, 'profile.md')
+    const challengesDir = paths.challenges
 
     // Read profile
     let name = 'User'
@@ -45,7 +80,7 @@ export async function GET() {
 
     // Check if checked in today
     const today = new Date().toISOString().split('T')[0]
-    const checkinPath = path.join(DATA_DIR, 'checkins', `${today}.md`)
+    const checkinPath = path.join(paths.checkins, `${today}.md`)
     try {
       await fs.access(checkinPath)
       completedToday = true

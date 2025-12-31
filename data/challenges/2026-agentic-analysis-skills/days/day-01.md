@@ -12,7 +12,7 @@
 ## Tasks
 - [ ] Watch: AI terminology + Claude Skills intro (20 min)
 - [ ] Install: OpenAnalyst CLI + Vibe Marketing Pack (15 min)
-- [ ] Demo: Run Vibe Skills - generate landing page, email sequence (20 min)
+- [x] Demo: Run Vibe Skills - generate landing page, email sequence (20 min)
 - [ ] Build: Your first Claude interaction using Vibe Skills (30 min)
 - [ ] Homework: Use Vibe Skills to create 3 marketing assets (30 min)
 - [ ] Post on social media (10 min)

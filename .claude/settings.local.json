@@ -24,7 +24,8 @@
       "Bash(mkdir:*)",
       "WebFetch(domain:docs.google.com)",
       "Bash(tasklist:*)",
-      "Bash(ping:*)"
+      "Bash(ping:*)",
+      "Bash(ren \"anit-gmail-co\" \"arjun-gmail-com\")"
     ]
   }
 }

@@ -167,6 +167,39 @@ function startUI() {
   });
 }
 
+// Start Claude Code Auto-Responder (THE BRAIN)
+function startClaudeResponder() {
+  return new Promise((resolve) => {
+    log('Starting Claude Code Brain...', colors.blue);
+
+    const responder = spawn('node', ['lib/claude-responder.js'], {
+      cwd: ROOT_DIR,
+      shell: true,
+    });
+
+    processes.push({ name: 'Claude Brain', process: responder });
+
+    let started = false;
+
+    responder.stdout.on('data', (data) => {
+      const output = data.toString();
+      // Show Claude responder output
+      if (output.includes('[Claude Responder]')) {
+        console.log(colors.cyan + output.trim() + colors.reset);
+      }
+      if (output.includes('Polling') && !started) {
+        started = true;
+        log('✓ Claude Code Brain active and listening!', colors.green);
+        setTimeout(resolve, 500);
+      }
+    });
+
+    responder.stderr.on('data', (data) => {
+      console.error(`${colors.red}[Claude Brain Error]${colors.reset} ${data}`);
+    });
+  });
+}
+
 // Show ready message
 function showReadyMessage() {
   console.log('\n' + colors.green + colors.bright);
@@ -178,9 +211,11 @@ function showReadyMessage() {
   console.log('║                                                            ║');
   console.log('║  All systems running:                                      ║');
   console.log('║    • WebSocket Server (ws://localhost:8765)                ║');
-  console.log('║    • Claude Code Listener (background)                     ║');
+  console.log('║    • Claude Code Brain (auto-responding!)                  ║');
   console.log('║    • Fast Cache System (in-memory)                         ║');
   console.log('║    • Next.js UI (http://localhost:3000)                    ║');
+  console.log('║                                                            ║');
+  console.log('║  Claude Code is THE BRAIN - responding to all messages!   ║');
   console.log('║                                                            ║');
   console.log('║  Press Ctrl+C to stop all services                         ║');
   console.log('║                                                            ║');
@@ -212,7 +247,7 @@ async function main() {
     // Step 2: Start WebSocket server
     await startWebSocketServer();
 
-    // Step 3: Start ws-listener (Claude Code)
+    // Step 3: Start ws-listener (for message routing)
     await startWsListener();
 
     // Step 4: Start UI

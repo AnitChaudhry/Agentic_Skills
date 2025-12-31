@@ -954,3 +954,38 @@ This is the unified view. Ask me about:
 - "Search for [keyword]"
 
 ---
+
+## **You** - 12/31/2025, 2:04:13 PM
+
+Hey
+
+---
+
+## **Assistant** - 12/31/2025, 2:04:13 PM
+
+Welcome to OpenAnalyst!
+
+System overview:
+- Users: 1
+- Total challenges: 2
+- Total tasks: 5
+
+This is the unified view. Ask me about:
+- "Show all users"
+- "Show all challenges"
+- "Show all tasks"
+- "Search for [keyword]"
+
+---
+
+## **You** - 12/31/2025, 2:05:47 PM
+
+Hey
+
+---
+
+## **Assistant** - 12/31/2025, 2:05:47 PM
+
+Good afternoon, Anit! 2 active challenges running. 5 tasks pending.
+
+---

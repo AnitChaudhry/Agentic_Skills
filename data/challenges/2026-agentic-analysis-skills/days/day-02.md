@@ -14,6 +14,7 @@
 - [ ] Code: Open Vibe Skill files, study their anatomy (25 min)
 - [ ] Build: Document what makes professional Skills effective (20 min)
 - [ ] Homework: Use @filename to reference Vibe Skills, see how Claude loads them (30 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 I understand how professional Skills are structured

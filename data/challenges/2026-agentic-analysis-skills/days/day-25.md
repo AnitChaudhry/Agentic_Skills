@@ -13,6 +13,7 @@
 - [ ] Plan: Finalize which Skills to build/enhance for portfolio (25 min)
 - [ ] Architecture: Design Skill system scope + timeline (35 min)
 - [ ] Homework: Begin foundation work on capstone Skills (30 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 I have a clear plan for my showcase Skill portfolio

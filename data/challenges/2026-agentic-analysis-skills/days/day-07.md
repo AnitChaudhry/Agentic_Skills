@@ -14,6 +14,7 @@
 - [ ] Test: Edge cases, error handling, documentation (30 min)
 - [ ] Demo: Record 2-min video of your Skill in action (20 min)
 - [ ] Deliverable: Working Skill + demo + 200-word reflection (25 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 TRIAL COMPLETE! I built a real Skill AND have skill-writer - I'm continuing!

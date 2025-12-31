@@ -14,6 +14,7 @@
 - [ ] Watch: Parameters and context management in Skills (25 min)
 - [ ] Code: Experiment with same Skill at different temperature settings (30 min)
 - [ ] Weekend Prep: Plan your first complete Skill with scripts (30 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 I understand how to optimize Skills for performance

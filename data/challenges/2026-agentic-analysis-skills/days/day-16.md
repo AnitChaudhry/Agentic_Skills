@@ -13,6 +13,7 @@
 - [ ] Code: Design a 3-4 Skill workflow on paper (20 min)
 - [ ] Build: Create 2 complementary Skills that work together (45 min)
 - [ ] Homework: Test them together on a complex task (30 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 Claude automatically orchestrates my Skills like a conductor

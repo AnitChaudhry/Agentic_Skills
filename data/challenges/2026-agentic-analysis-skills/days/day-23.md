@@ -12,6 +12,7 @@
 - [ ] Code: Design habit pattern analysis logic (25 min)
 - [ ] Build: accountability-coach.skill analyzing your own progress (45 min)
 - [ ] Homework: Run on your last 24 hours of CLI data (25 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 I built a Skill that coaches me - I AM the product!

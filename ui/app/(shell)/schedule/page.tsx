@@ -47,12 +47,17 @@ export default function SchedulePage() {
         // Calculate date based on challenge start date + day number
         const challenge = challenges.find((c: any) => c.id === task.challengeId)
         // Use challenge start date (e.g., 2026-01-01) or default to today
-        const startDate = challenge?.start_date || challenge?.startDate || challenge?.['start date']
-        const baseDate = startDate ? new Date(startDate) : new Date()
-        baseDate.setHours(0, 0, 0, 0)
+        const startDateStr = challenge?.start_date || challenge?.startDate || challenge?.['start date']
 
-        const taskDate = new Date(baseDate)
-        taskDate.setDate(taskDate.getDate() + (task.day - 1))
+        // Parse date string directly without timezone issues
+        let taskDate: Date
+        if (startDateStr) {
+          const [year, month, day] = startDateStr.split('-').map(Number)
+          taskDate = new Date(year, month - 1, day + (task.day - 1))
+        } else {
+          taskDate = new Date()
+          taskDate.setDate(taskDate.getDate() + (task.day - 1))
+        }
 
         // Calculate time slot: 9:30 to 10:30, each task is 10 minutes
         // Find task index within its day
@@ -65,19 +70,27 @@ export default function SchedulePage() {
         const startHour = 9 + Math.floor(startMinutes / 60)
         const startMin = startMinutes % 60
 
+        // Format date without timezone issues
+        const dateStr = `${taskDate.getFullYear()}-${String(taskDate.getMonth() + 1).padStart(2, '0')}-${String(taskDate.getDate()).padStart(2, '0')}`
+
+        // Check if challenge is paused
+        const isPaused = challenge?.status === 'paused'
+
         return {
           id: task.id,
-          title: task.title,
-          date: taskDate.toISOString().split('T')[0],
+          title: isPaused ? `[PAUSED] ${task.title}` : task.title,
+          date: dateStr,
           time: `${startHour}:${startMin.toString().padStart(2, '0')}`,
           duration: 10, // Each task is 10 minutes
           status: task.completed ? 'completed' : 'pending',
           type: 'challenge-task' as const,
           challengeName: task.challengeName,
           challengeId: task.challengeId,
+          challengeStatus: challenge?.status || 'active',
           day: task.day,
           dayTitle: task.dayTitle,
           priority: task.priority,
+          isPaused,
         }
       })
 

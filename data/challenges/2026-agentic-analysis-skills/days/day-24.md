@@ -13,6 +13,7 @@
 - [ ] Code: Add memory functionality to an existing Skill (35 min)
 - [ ] Build: Integrate external tool (browser/API) into Skill workflow (40 min)
 - [ ] Homework: Test multi-day memory persistence (20 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 My Skills remember context and use external tools

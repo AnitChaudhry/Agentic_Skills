@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   Flame, Trophy, Calendar, TrendingUp, Clock, Target,
-  AlertCircle, CheckCircle, XCircle, ArrowLeft
+  AlertCircle, CheckCircle, XCircle, ArrowLeft, Pause, Play, Square
 } from 'lucide-react'
 import { AnimatedButton } from '@/components/ui/AnimatedButton'
 import type { Challenge, Milestone } from '@/types/streak'
@@ -83,6 +83,22 @@ export default function StreakDetailPage() {
       loadChallengeDetails()
     } catch (error) {
       console.error('Check-in failed:', error)
+    }
+  }
+
+  const handleStatusChange = async (newStatus: 'active' | 'paused' | 'completed' | 'failed') => {
+    try {
+      const res = await fetch(`/api/challenges/${challengeId}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setChallenge(prev => prev ? { ...prev, status: newStatus } : null)
+      }
+    } catch (error) {
+      console.error('Failed to update status:', error)
     }
   }
 
@@ -284,7 +300,7 @@ export default function StreakDetailPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-oa-text-secondary mb-1">
-                  Last check-in: {new Date(challenge.streak.lastCheckin).toLocaleDateString()}
+                  Last check-in: {challenge.streak.lastCheckin ? new Date(challenge.streak.lastCheckin).toLocaleDateString() : 'Never'}
                 </p>
                 <p className="text-sm text-oa-text-secondary">
                   Status: <span className={`font-medium ${getStatusColor(challenge.status)}`}>
@@ -292,10 +308,71 @@ export default function StreakDetailPage() {
                   </span>
                 </p>
               </div>
-              <AnimatedButton variant="primary" onClick={handleCheckIn}>
-                <CheckCircle className="w-4 h-4" />
-                Check In Today
-              </AnimatedButton>
+              <div className="flex items-center gap-2">
+                {challenge.status !== 'completed' && challenge.status !== 'failed' && (
+                  <AnimatedButton variant="primary" onClick={handleCheckIn} disabled={challenge.status === 'paused'}>
+                    <CheckCircle className="w-4 h-4" />
+                    Check In Today
+                  </AnimatedButton>
+                )}
+              </div>
+            </div>
+
+            {/* Status Controls */}
+            <div className="mt-4 pt-4 border-t border-oa-border">
+              <p className="text-xs text-oa-text-secondary mb-3">Challenge Controls:</p>
+              <div className="flex flex-wrap gap-2">
+                {challenge.status === 'active' && (
+                  <button
+                    onClick={() => handleStatusChange('paused')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 rounded-lg transition-colors"
+                  >
+                    <Pause className="w-3.5 h-3.5" />
+                    Pause
+                  </button>
+                )}
+                {challenge.status === 'paused' && (
+                  <button
+                    onClick={() => handleStatusChange('active')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-green-500/10 text-green-500 hover:bg-green-500/20 rounded-lg transition-colors"
+                  >
+                    <Play className="w-3.5 h-3.5" />
+                    Resume
+                  </button>
+                )}
+                {(challenge.status === 'active' || challenge.status === 'paused') && (
+                  <>
+                    <button
+                      onClick={() => handleStatusChange('completed')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 rounded-lg transition-colors"
+                    >
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      Mark Complete
+                    </button>
+                    <button
+                      onClick={() => handleStatusChange('failed')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-lg transition-colors"
+                    >
+                      <Square className="w-3.5 h-3.5" />
+                      Stop
+                    </button>
+                  </>
+                )}
+                {(challenge.status === 'completed' || challenge.status === 'failed') && (
+                  <button
+                    onClick={() => handleStatusChange('active')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-green-500/10 text-green-500 hover:bg-green-500/20 rounded-lg transition-colors"
+                  >
+                    <Play className="w-3.5 h-3.5" />
+                    Restart Challenge
+                  </button>
+                )}
+              </div>
+              {challenge.status === 'paused' && (
+                <p className="mt-2 text-xs text-yellow-500">
+                  Challenge is paused. Tasks will still appear but check-ins are disabled.
+                </p>
+              )}
             </div>
           </motion.div>
 

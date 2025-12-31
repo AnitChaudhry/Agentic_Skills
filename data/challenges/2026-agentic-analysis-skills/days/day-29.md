@@ -14,6 +14,7 @@
 - [ ] Share: GitHub repo links with cohort (15 min)
 - [ ] Learn: How others solved similar problems with Skills (45 min)
 - [ ] Feedback: Give/receive constructive Skill reviews (30 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 I showcased my Skills to the world

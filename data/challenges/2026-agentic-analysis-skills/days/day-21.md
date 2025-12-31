@@ -14,6 +14,7 @@
 - [ ] REVEAL: Receive nanobanana-skill (bonus unlock!) (15 min)
 - [ ] Demo: Add visual generation to your Skill ecosystem (30 min)
 - [ ] Deliverable: 3-5 Skills + visual outputs (30 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 THREE-WEEK MILESTONE! My Skills create complete content systems (text + visuals)!

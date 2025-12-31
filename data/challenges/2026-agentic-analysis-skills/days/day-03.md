@@ -14,6 +14,7 @@
 - [ ] Code: Create your SKILL.md file with proper YAML (25 min)
 - [ ] Build: content-idea-generator.skill (simplified version of Vibe's ideation) (40 min)
 - [ ] Homework: Test your Skill on 3 different content types (20 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 First Milestone! I created my first Skill from scratch!

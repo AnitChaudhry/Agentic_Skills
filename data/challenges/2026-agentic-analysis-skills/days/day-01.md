@@ -15,6 +15,7 @@
 - [ ] Demo: Run Vibe Skills - generate landing page, email sequence (20 min)
 - [ ] Build: Your first Claude interaction using Vibe Skills (30 min)
 - [ ] Homework: Use Vibe Skills to create 3 marketing assets (30 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 I got $199 worth of professional Skills on Day 1!

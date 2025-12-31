@@ -11,24 +11,75 @@ export function RightPanel() {
   const { challenges, loadChallenges } = useChallengeStore()
   const { todos, loadTodos } = useTodoStore()
   const [expandedNextDay, setExpandedNextDay] = useState(false)
+  const [challengeTasks, setChallengeTasks] = useState<any[]>([])
 
   useEffect(() => {
     loadChallenges()
     loadTodos()
+    loadChallengeTasks()
   }, [])
 
+  // Load challenge tasks from plan.md files
+  const loadChallengeTasks = async () => {
+    try {
+      const tasksRes = await fetch('/api/todos/from-challenges')
+      const tasksData = await tasksRes.json()
+
+      const challengesRes = await fetch('/api/challenges')
+      const challengesData = await challengesRes.json()
+      const challengesList = challengesData.challenges || []
+
+      // Calculate dates for each task based on challenge start date
+      const tasksWithDates = (tasksData.tasks || []).map((task: any) => {
+        const challenge = challengesList.find((c: any) => c.id === task.challengeId)
+        const startDateStr = challenge?.startDate || challenge?.start_date
+        const isPaused = challenge?.status === 'paused'
+
+        // Parse date string directly without timezone issues
+        // Format: "2026-01-01" -> add (day-1) days
+        let dueDateStr = startDateStr
+        if (startDateStr && task.day) {
+          const [year, month, day] = startDateStr.split('-').map(Number)
+          const taskDate = new Date(year, month - 1, day + (task.day - 1))
+          dueDateStr = `${taskDate.getFullYear()}-${String(taskDate.getMonth() + 1).padStart(2, '0')}-${String(taskDate.getDate()).padStart(2, '0')}`
+        }
+
+        return {
+          ...task,
+          dueDate: dueDateStr || new Date().toISOString().split('T')[0],
+          isPaused,
+          challengeStatus: challenge?.status || 'active'
+        }
+      })
+
+      setChallengeTasks(tasksWithDates)
+    } catch (error) {
+      console.error('Failed to load challenge tasks:', error)
+    }
+  }
+
   const activeChallenges = Array.isArray(challenges) ? challenges.filter(c => c.status === 'active') : []
-  const todayTodos = Array.isArray(todos) ? todos.filter(t => {
-    const today = new Date().toISOString().split('T')[0]
+
+  // Get today's date (formatted without timezone issues)
+  const now = new Date()
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+
+  // Combine regular todos with challenge tasks for today
+  const todayRegularTodos = Array.isArray(todos) ? todos.filter(t => {
     return t.dueDate === today && t.status !== 'completed'
   }) : []
+  const todayChallengeTasks = challengeTasks.filter(t => t.dueDate === today && !t.completed)
+  const todayTodos = [...todayRegularTodos, ...todayChallengeTasks]
 
-  // Get tomorrow's date
-  const tomorrow = new Date()
+  // Get tomorrow's date (formatted without timezone issues)
+  const tomorrow = new Date(now)
   tomorrow.setDate(tomorrow.getDate() + 1)
-  const tomorrowStr = tomorrow.toISOString().split('T')[0]
+  const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`
 
-  const tomorrowTodos = Array.isArray(todos) ? todos.filter(t => t.dueDate === tomorrowStr) : []
+  // Combine regular todos with challenge tasks for tomorrow
+  const tomorrowRegularTodos = Array.isArray(todos) ? todos.filter(t => t.dueDate === tomorrowStr) : []
+  const tomorrowChallengeTasks = challengeTasks.filter(t => t.dueDate === tomorrowStr)
+  const tomorrowTodos = [...tomorrowRegularTodos, ...tomorrowChallengeTasks]
 
   return (
     <div className="flex flex-col h-full bg-oa-bg-primary overflow-y-auto">
@@ -103,21 +154,38 @@ export function RightPanel() {
             {todayTodos.slice(0, 4).map((todo) => (
               <div
                 key={todo.id}
-                className="flex items-start gap-2 p-2 rounded-lg hover:bg-oa-bg-secondary transition-colors cursor-pointer"
-                onClick={() => router.push('/todos')}
+                className={`flex items-start gap-2 p-2 rounded-lg transition-colors cursor-pointer ${
+                  todo.isPaused ? 'opacity-50 bg-yellow-500/5' : 'hover:bg-oa-bg-secondary'
+                }`}
+                onClick={() => router.push(todo.challengeId ? '/schedule' : '/todos')}
               >
                 <Circle className="w-4 h-4 text-oa-text-secondary mt-0.5 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-oa-text-primary line-clamp-1">{todo.text}</p>
-                  {todo.time && (
+                  <p className="text-xs text-oa-text-primary line-clamp-1">
+                    {todo.isPaused && <span className="text-yellow-500">[PAUSED] </span>}
+                    {todo.text || todo.title}
+                  </p>
+                  {(todo.time || todo.challengeName) && (
                     <div className="flex items-center gap-1 mt-0.5">
-                      <Clock className="w-3 h-3 text-oa-text-secondary" />
-                      <span className="text-[10px] text-oa-text-secondary">{todo.time}</span>
+                      {todo.time && (
+                        <>
+                          <Clock className="w-3 h-3 text-oa-text-secondary" />
+                          <span className="text-[10px] text-oa-text-secondary">{todo.time}</span>
+                        </>
+                      )}
+                      {todo.challengeName && (
+                        <span className={`text-[10px] ${todo.isPaused ? 'text-yellow-500' : 'text-oa-accent'}`}>
+                          {todo.challengeName}
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
-                {todo.priority === 'high' && (
+                {todo.priority === 'high' && !todo.isPaused && (
                   <span className="text-[10px] px-1.5 py-0.5 bg-red-500/10 text-red-400 rounded">!</span>
+                )}
+                {todo.isPaused && (
+                  <span className="text-[10px] px-1.5 py-0.5 bg-yellow-500/10 text-yellow-500 rounded">Paused</span>
                 )}
               </div>
             ))}
@@ -162,15 +230,33 @@ export function RightPanel() {
               tomorrowTodos.map((todo) => (
                 <div
                   key={todo.id}
-                  className="flex items-start gap-2 p-2 rounded-lg bg-oa-bg-secondary"
+                  className={`flex items-start gap-2 p-2 rounded-lg ${
+                    todo.isPaused ? 'opacity-50 bg-yellow-500/5' : 'bg-oa-bg-secondary'
+                  }`}
                 >
                   <Calendar className="w-4 h-4 text-oa-text-secondary mt-0.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-oa-text-primary line-clamp-1">{todo.text}</p>
-                    {todo.time && (
-                      <span className="text-[10px] text-oa-text-secondary">{todo.time}</span>
-                    )}
+                    <p className="text-xs text-oa-text-primary line-clamp-1">
+                      {todo.isPaused && <span className="text-yellow-500">[PAUSED] </span>}
+                      {todo.text || todo.title}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {todo.time && (
+                        <span className="text-[10px] text-oa-text-secondary">{todo.time}</span>
+                      )}
+                      {todo.challengeName && (
+                        <span className={`text-[10px] ${todo.isPaused ? 'text-yellow-500' : 'text-oa-accent'}`}>
+                          {todo.challengeName}
+                        </span>
+                      )}
+                      {todo.dayTitle && (
+                        <span className="text-[10px] text-oa-text-secondary">Day {todo.day}</span>
+                      )}
+                    </div>
                   </div>
+                  {todo.isPaused && (
+                    <span className="text-[10px] px-1.5 py-0.5 bg-yellow-500/10 text-yellow-500 rounded flex-shrink-0">Paused</span>
+                  )}
                 </div>
               ))
             ) : (

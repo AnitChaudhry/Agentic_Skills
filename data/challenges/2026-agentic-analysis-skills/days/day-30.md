@@ -14,6 +14,7 @@
 - [ ] Community: Lifetime access + OpenAnalyst Skills marketplace (20 min)
 - [ ] Opportunities: Job support, consulting, instructor program (30 min)
 - [ ] Accountability Coach: Final retrospective + transformation summary (30 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 FULL COMPLETION! I'm a professional Claude Skills developer ready for 2026

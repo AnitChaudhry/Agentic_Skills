@@ -40,7 +40,8 @@ export default function Calendar({ selectedDate, onSelectDate, sessions }: Calen
 
   const getDateKey = (day: number) => {
     const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
-    return date.toISOString().split('T')[0]
+    // Format date without timezone issues (use local date, not UTC)
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
   }
 
   const getSessionsForDay = (day: number) => {

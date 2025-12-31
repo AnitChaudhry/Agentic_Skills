@@ -1,11 +1,11 @@
 # Motivation Triggers
 
 ## What Works
-- undefined
+- Visible progress tracking
 
 ## Current Big Goal
-Learnng AI
+Learning AI
 
 ## Notes
-User prefers undefined accountability style.
-Most productive during undefined.
+User prefers Tough Love accountability style.
+Most productive during Morning (9am-12pm).

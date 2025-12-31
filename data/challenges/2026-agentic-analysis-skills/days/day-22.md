@@ -12,6 +12,7 @@
 - [ ] Code: Build priority scoring logic (30 min)
 - [ ] Build: product-manager.skill for task/feature ranking (40 min)
 - [ ] Homework: Apply to a real project (yours or open-source) (25 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 Final week starts! I have a Skill that does product management work

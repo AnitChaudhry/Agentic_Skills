@@ -34,7 +34,8 @@ export function CalendarWeek({
   })
 
   const getEventsForDateAndHour = (date: Date, hour: number) => {
-    const dateStr = date.toISOString().split('T')[0]
+    // Format date without timezone issues (use local date, not UTC)
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
     return events.filter((event) => {
       if (event.date !== dateStr) return false
       if (!event.time) return hour === 0 // All-day events show at midnight

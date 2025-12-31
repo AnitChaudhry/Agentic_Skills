@@ -13,6 +13,7 @@
 - [ ] Code: Convert Google Sheet to JSON format (20 min)
 - [ ] Build: Enhanced knowledge-retriever.skill with JSON support (40 min)
 - [ ] Homework: Test on 10 different queries, document accuracy (30 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 My Skills can work with structured data formats

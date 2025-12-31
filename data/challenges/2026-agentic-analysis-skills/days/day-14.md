@@ -14,6 +14,7 @@
 - [ ] REVEAL: Receive accountability-coach Skill files (15 min)
 - [ ] Study: How the accountability system works under the hood (30 min)
 - [ ] Deliverable: BI Skill + portfolio publish (25 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 TWO-WEEK MILESTONE! The system coaching me IS a Skill I can build!

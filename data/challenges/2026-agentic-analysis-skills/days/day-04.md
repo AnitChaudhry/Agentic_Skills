@@ -14,6 +14,7 @@
 - [ ] Code: Test complex projects using multiple Vibe Skills together (30 min)
 - [ ] Build: Design your own simple orchestration logic (30 min)
 - [ ] Homework: Document which Vibe Skills activate together and why (20 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 I understand how Skills orchestrate like a team

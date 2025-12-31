@@ -12,6 +12,7 @@
 - [ ] Build first 2-3 Skills of your system (60 min)
 - [ ] Design: How they'll work together automatically (30 min)
 - [ ] Learn: Enterprise-grade Skill development patterns (30 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 I'm building a Skill system like companies sell for $$

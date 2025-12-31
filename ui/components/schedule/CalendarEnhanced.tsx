@@ -121,7 +121,8 @@ export function CalendarEnhanced({
   }
 
   const getEventsForDate = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0]
+    // Format date without timezone issues (use local date, not UTC)
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
     return filteredEvents.filter((e) => e.date === dateStr)
   }
 

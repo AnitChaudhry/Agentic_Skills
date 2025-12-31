@@ -13,6 +13,7 @@
 - [ ] Watch: How skill-writer helps create Skills faster (25 min)
 - [ ] Build: Use skill-writer to scaffold your weekend Skill (40 min)
 - [ ] Design: Personal productivity Skill (habit tracking, goal setting, or daily planning) (45 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 I got the Skill that builds Skills - this is meta!

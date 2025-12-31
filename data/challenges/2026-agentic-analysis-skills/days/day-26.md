@@ -12,6 +12,7 @@
 - [ ] Workshop: Mid-point check-ins, debugging help (30 min)
 - [ ] Build: Continue capstone Skills in live session (60 min)
 - [ ] Weekend Challenge: Complete Skill portfolio (15+ Skills total) (30 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 My capstone Skills are 50% complete and working

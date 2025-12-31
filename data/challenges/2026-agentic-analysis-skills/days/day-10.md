@@ -14,6 +14,7 @@
 - [ ] Code: Create a Google Sheet with 20 knowledge items (20 min)
 - [ ] Build: knowledge-retriever.skill that searches your sheet (40 min)
 - [ ] Accountability Coach: First CLI check-in (15 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 My Skill can retrieve information from custom data sources

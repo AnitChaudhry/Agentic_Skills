@@ -13,6 +13,7 @@
 - [ ] Documentation: Write comprehensive SKILL.md files (30 min)
 - [ ] Portfolio: Set up GitHub repo structure (20 min)
 - [ ] Learn: How to showcase Skills professionally (10 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 My Skill portfolio core is complete and documented

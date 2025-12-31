@@ -11,6 +11,7 @@
 - [ ] Set up data sources (sheets/JSON + MCP) (30 min)
 - [ ] Build: Core analysis logic in Skill (50 min)
 - [ ] Learn: Composing multiple capabilities in one Skill (30 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 My Skill pulls live data AND retrieves historical knowledge

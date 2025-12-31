@@ -13,6 +13,7 @@
 - [ ] Code: Design Skill that analyzes 10 LinkedIn/Instagram posts (30 min)
 - [ ] Build: social-media-analyzer.skill with insight generation (45 min)
 - [ ] Homework: Run on your own content or provided sample dataset (25 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 I built a Skill that replaces expensive marketing analytics tools

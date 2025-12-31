@@ -12,6 +12,7 @@
 - [ ] Code: Design pattern-finding logic for business metrics (25 min)
 - [ ] Build: business-intelligence.skill for trend detection (40 min)
 - [ ] Homework: Apply to sample business dataset (provided) (30 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 My Skill does what PowerBI does, but with natural language

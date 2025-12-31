@@ -12,6 +12,7 @@
 - [ ] Recap: Week 2 concepts + Q&A (25 min)
 - [ ] Challenge: Build business-intelligence.skill combining RAG + MCP (60 min)
 - [ ] Requirements: Real dataset analysis + live data retrieval (30 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 I have 3 working Skills in my portfolio already

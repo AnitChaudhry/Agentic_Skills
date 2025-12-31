@@ -64,7 +64,8 @@ export function CalendarDay({
   const [viewMode, setViewMode] = useState<'list' | 'timeline'>('list')
   const [showTimeline, setShowTimeline] = useState(false)
   const hours = Array.from({ length: 24 }, (_, i) => i)
-  const dateStr = date.toISOString().split('T')[0]
+  // Format date without timezone issues (use local date, not UTC)
+  const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 
   // Get events for this day
   const dayEvents = events.filter((e) => e.date === dateStr)

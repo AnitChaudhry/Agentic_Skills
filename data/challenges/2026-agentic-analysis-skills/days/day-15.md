@@ -13,6 +13,7 @@
 - [ ] Code: Generate embeddings for your knowledge base (30 min)
 - [ ] Build: semantic-search.skill using embeddings (40 min)
 - [ ] Homework: Compare 10 queries (semantic vs keyword results) (25 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 Week 3 starts! My Skills understand meaning, not just keywords

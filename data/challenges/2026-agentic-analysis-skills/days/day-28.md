@@ -14,6 +14,7 @@
 - [ ] Portfolio: Write compelling README showcasing your Skills (30 min)
 - [ ] Demo: Record 3-min video of flagship Skill system (30 min)
 - [ ] Deliverable: Complete Skill portfolio on GitHub (20 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 My Skill portfolio is ready to show employers

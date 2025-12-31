@@ -13,6 +13,7 @@
 - [ ] Challenge: Build YOUR complete Skill system (3-5 Skills working together) (60 min)
 - [ ] Choose: Marketing OR Career OR Business OR Productivity domain (15 min)
 - [ ] Design: Architecture for your Skill ecosystem (20 min)
+- [ ] Post on social media (10 min)
 
 ## Quick Win
 I'm ready to build a production-grade Skill ecosystem

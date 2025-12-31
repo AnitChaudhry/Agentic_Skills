@@ -22,7 +22,9 @@
       "Bash(findstr:*)",
       "Bash(del \"C:\\\\Users\\\\Anit\\\\Downloads\\\\OpenAnalyst Accountability coach\\\\data\\\\.cache-index.json\")",
       "Bash(mkdir:*)",
-      "WebFetch(domain:docs.google.com)"
+      "WebFetch(domain:docs.google.com)",
+      "Bash(tasklist:*)",
+      "Bash(ping:*)"
     ]
   }
 }

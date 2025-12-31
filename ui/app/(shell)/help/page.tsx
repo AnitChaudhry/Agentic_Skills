@@ -23,88 +23,136 @@ export default function HelpPage() {
           <div>
             <h3 className="text-lg font-semibold mb-3">Welcome to OpenAnalyst Accountability Coach</h3>
             <p className="text-sm text-oa-text-secondary leading-relaxed mb-4">
-              This is your personal accountability system powered by AI. Everything runs locally on your machine,
-              and all your data is stored in <code className="px-2 py-1 bg-oa-bg-secondary border border-oa-border">data/</code> directory.
+              Your personal AI-powered accountability system. Everything runs locally,
+              and all your data is stored in the <code className="px-2 py-1 bg-oa-bg-secondary border border-oa-border">data/</code> folder.
             </p>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">Quick Start Steps</h4>
+            <h4 className="font-semibold mb-2">Quick Start</h4>
             <ol className="text-sm text-oa-text-secondary space-y-2 list-decimal list-inside">
-              <li>Complete the onboarding (7 questions about your goals and preferences)</li>
-              <li>Create your first challenge from the Streaks section</li>
-              <li>Use the floating check-in button (bottom-right) daily to log progress</li>
-              <li>Chat with your accountability agent for guidance and support</li>
-              <li>Review insights to track your progress over time</li>
+              <li>Run <code className="px-1 bg-oa-bg-secondary">npm start</code> to launch everything</li>
+              <li>Open <code className="px-1 bg-oa-bg-secondary">http://localhost:3000</code></li>
+              <li>Complete onboarding to create your profile</li>
+              <li>Create your first challenge from the Streak section</li>
+              <li>Check in daily to build your streak</li>
             </ol>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">System Requirements</h4>
+            <h4 className="font-semibold mb-2">What Gets Started</h4>
             <ul className="text-sm text-oa-text-secondary space-y-1">
-              <li>• Node.js 18+ installed</li>
-              <li>• Claude API key (Anthropic)</li>
-              <li>• Gemini API key (for vision board features)</li>
+              <li>• Next.js UI at localhost:3000</li>
+              <li>• WebSocket Server at localhost:8765</li>
+              <li>• Fast Cache System (0-2ms queries)</li>
+              <li>• AI Response Listener</li>
             </ul>
           </div>
         </div>
       ),
     },
     {
-      id: 'agents',
-      title: 'Understanding Agents',
-      icon: '🤖',
+      id: 'navigation',
+      title: 'Navigation',
+      icon: '🧭',
       content: (
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold mb-3">What are Agents?</h3>
+            <h3 className="text-lg font-semibold mb-3">App Navigation</h3>
             <p className="text-sm text-oa-text-secondary leading-relaxed mb-4">
-              Agents are specialized AI assistants focused on different aspects of your accountability journey.
-              Each agent has its own personality, capabilities, and file structure.
+              Use the left sidebar to navigate between different sections of the app.
             </p>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">Default Agent: Accountability Coach</h4>
-            <p className="text-sm text-oa-text-secondary mb-3">
-              Your primary accountability partner. Direct, supportive, and action-focused.
-            </p>
-            <div className="bg-oa-bg-secondary border border-oa-border p-4 text-xs">
-              <p className="mb-2"><strong>Capabilities:</strong></p>
-              <ul className="space-y-1 text-oa-text-secondary">
-                <li>• Daily check-ins and progress tracking</li>
-                <li>• Goal setting and planning</li>
-                <li>• Accountability contracts with consequences</li>
-                <li>• Insights and pattern recognition</li>
-                <li>• Intelligent schedule rescheduling</li>
-              </ul>
+            <h4 className="font-semibold mb-2">Main Sections</h4>
+            <div className="space-y-2 text-sm">
+              <div className="border-l-2 border-oa-border pl-3">
+                <p className="font-medium">Home</p>
+                <p className="text-xs text-oa-text-secondary">Unified chat with access to all data</p>
+              </div>
+              <div className="border-l-2 border-oa-border pl-3">
+                <p className="font-medium">Schedule</p>
+                <p className="text-xs text-oa-text-secondary">Calendar with challenge tasks (month/week/day views)</p>
+              </div>
+              <div className="border-l-2 border-oa-border pl-3">
+                <p className="font-medium">Streak</p>
+                <p className="text-xs text-oa-text-secondary">All challenges overview and progress</p>
+              </div>
+              <div className="border-l-2 border-oa-border pl-3">
+                <p className="font-medium">Todos</p>
+                <p className="text-xs text-oa-text-secondary">Task management</p>
+              </div>
+              <div className="border-l-2 border-oa-border pl-3">
+                <p className="font-medium">Prompts</p>
+                <p className="text-xs text-oa-text-secondary">Dynamic and custom AI prompts</p>
+              </div>
+              <div className="border-l-2 border-oa-border pl-3">
+                <p className="font-medium">Workspace</p>
+                <p className="text-xs text-oa-text-secondary">File browser for data folder</p>
+              </div>
+              <div className="border-l-2 border-oa-border pl-3">
+                <p className="font-medium">Skills</p>
+                <p className="text-xs text-oa-text-secondary">Browse and manage AI skills</p>
+              </div>
             </div>
           </div>
-
+        </div>
+      ),
+    },
+    {
+      id: 'challenges',
+      title: 'Challenges',
+      icon: '🎯',
+      content: (
+        <div className="space-y-6">
           <div>
-            <h4 className="font-semibold mb-2">Adding New Agents</h4>
-            <p className="text-sm text-oa-text-secondary mb-3">
-              Click the "Add Agent" button in the left sidebar. You'll need to create:
+            <h3 className="text-lg font-semibold mb-3">Creating Challenges</h3>
+            <p className="text-sm text-oa-text-secondary leading-relaxed mb-4">
+              Challenges are your accountability goals. Each challenge has daily tasks,
+              progress tracking, and streak counting.
             </p>
-            <ol className="text-sm text-oa-text-secondary space-y-2 list-decimal list-inside">
-              <li>Agent folder in <code className="px-1 bg-oa-bg-secondary">data/agents/</code></li>
-              <li><code className="px-1 bg-oa-bg-secondary">agent.json</code> config file with name, description, capabilities</li>
-              <li>Optional: custom prompt file for specialized behavior</li>
-            </ol>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">Agent File Structure</h4>
+            <h4 className="font-semibold mb-2">Challenge Structure</h4>
             <pre className="bg-oa-bg-secondary border border-oa-border p-4 text-xs overflow-x-auto">
-{`data/agents/
-├── accountability-coach/
-│   ├── agent.json          # Agent configuration
-│   ├── context/            # Agent-specific knowledge
-│   ├── outputs/            # Generated summaries
-│   └── resources/          # Files, images, videos
-└── your-custom-agent/
+{`data/challenges/{challenge-id}/
+├── challenge.md      # Config and progress
+├── plan.md           # Learning/activity plan
+└── days/             # Daily task files
+    ├── day-01.md
+    ├── day-02.md
     └── ...`}
             </pre>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-2">Day File Format</h4>
+            <pre className="bg-oa-bg-secondary border border-oa-border p-4 text-xs overflow-x-auto">
+{`# Day 1 - Topic Name
+
+## Status: pending
+
+## Tasks
+- [ ] Task 1 (30 min)
+- [ ] Task 2 (20 min)
+- [ ] Task 3 (15 min)
+
+## Check-in
+- **Completed:** No
+- **Mood:**
+- **Blockers:** None`}
+            </pre>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-2">Viewing Challenges</h4>
+            <ul className="text-sm text-oa-text-secondary space-y-1">
+              <li>• <strong>Streak page</strong> - Overview of all challenges</li>
+              <li>• <strong>Streak detail</strong> - Click to see progress, tasks, check-in</li>
+              <li>• <strong>Schedule</strong> - Tasks appear on their scheduled day</li>
+            </ul>
           </div>
         </div>
       ),
@@ -116,52 +164,46 @@ export default function HelpPage() {
       content: (
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold mb-3">The Power of Daily Check-ins</h3>
+            <h3 className="text-lg font-semibold mb-3">The Check-in Flow</h3>
             <p className="text-sm text-oa-text-secondary leading-relaxed mb-4">
-              Check-ins are the core of your accountability system. They help you stay consistent,
-              track progress, and build momentum.
+              Check-ins are how you track progress and build your streak.
+              Complete all 4 steps to log your day.
             </p>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">How to Check In</h4>
+            <h4 className="font-semibold mb-2">4-Step Check-in Process</h4>
             <ol className="text-sm text-oa-text-secondary space-y-3 list-decimal list-inside">
               <li>
-                <strong>Click the floating checkmark button</strong> (bottom-right corner, available everywhere)
+                <strong>Task Selection</strong> - Mark which tasks you completed
               </li>
               <li>
-                <strong>Rate your mood</strong> - How are you feeling today? (1-5 scale)
+                <strong>Mood Rating</strong> - Rate your energy (1-5 scale)
               </li>
               <li>
-                <strong>Mark task completion</strong> - Did you complete today's scheduled task?
+                <strong>Reflection</strong> - Record wins and blockers
               </li>
               <li>
-                <strong>Record wins and blockers</strong> - What went well? What challenges did you face?
-              </li>
-              <li>
-                <strong>Commit to tomorrow</strong> - What will you accomplish tomorrow?
+                <strong>Commitment</strong> - Set tomorrow's intention
               </li>
             </ol>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">Check-in Data Storage</h4>
-            <p className="text-sm text-oa-text-secondary mb-2">
-              All check-ins are saved as markdown files:
-            </p>
-            <code className="block bg-oa-bg-secondary border border-oa-border p-3 text-xs">
-              data/checkins/YYYY-MM-DD.md
-            </code>
-            <p className="text-xs text-oa-text-secondary mt-2">
-              You can edit these files manually if needed. They're human-readable and version-control friendly.
-            </p>
+            <h4 className="font-semibold mb-2">What Gets Updated</h4>
+            <ul className="text-sm text-oa-text-secondary space-y-1">
+              <li>• Task checkboxes in day files: <code className="px-1 bg-oa-bg-secondary">[ ]</code> → <code className="px-1 bg-oa-bg-secondary">[x]</code></li>
+              <li>• Challenge progress percentage</li>
+              <li>• Streak count in challenge.md</li>
+              <li>• Check-in record in <code className="px-1 bg-oa-bg-secondary">data/checkins/</code></li>
+              <li>• Registry for streak tracking</li>
+            </ul>
           </div>
 
-          <div>
-            <h4 className="font-semibold mb-2">Email Reminders</h4>
-            <p className="text-sm text-oa-text-secondary">
-              Set up email reminders in Settings to get notified before your scheduled tasks.
-              Reminders include your progression tracker and upcoming task details.
+          <div className="bg-oa-bg-secondary border border-oa-border p-4">
+            <p className="text-xs text-oa-text-secondary">
+              <strong>Tip:</strong> You can also mark tasks complete directly from the Schedule or Streak pages
+              without doing a full check-in.
             </p>
           </div>
         </div>
@@ -169,237 +211,161 @@ export default function HelpPage() {
     },
     {
       id: 'schedule',
-      title: 'Schedule & Rescheduling',
+      title: 'Schedule & Calendar',
       icon: '📅',
       content: (
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold mb-3">Intelligent Scheduling</h3>
+            <h3 className="text-lg font-semibold mb-3">Calendar Features</h3>
             <p className="text-sm text-oa-text-secondary leading-relaxed mb-4">
-              Your schedule is stored in <code className="px-2 py-1 bg-oa-bg-secondary">data/schedule/calendar.json</code>.
-              It works like Google Calendar but with AI-powered intelligent rescheduling.
+              The Schedule page shows your challenge tasks in a calendar view.
+              Tasks are displayed on their scheduled day based on the challenge start date.
             </p>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">How Rescheduling Works</h4>
-            <p className="text-sm text-oa-text-secondary mb-3">
-              When you reschedule a task, the system:
-            </p>
-            <ol className="text-sm text-oa-text-secondary space-y-2 list-decimal list-inside">
-              <li>Analyzes dependencies (what tasks depend on this one)</li>
-              <li>Identifies affected tasks</li>
-              <li>Intelligently shifts only related tasks</li>
-              <li>Preserves your overall plan structure</li>
-              <li>Updates challenge logs automatically</li>
-            </ol>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-2">Calendar Features</h4>
-            <ul className="text-sm text-oa-text-secondary space-y-2">
-              <li>• Recurring tasks (daily, weekly, custom patterns)</li>
-              <li>• Task prioritization (high, medium, low)</li>
-              <li>• Time blocking with duration estimates</li>
-              <li>• Multi-challenge scheduling</li>
-              <li>• Automatic conflict detection</li>
+            <h4 className="font-semibold mb-2">Calendar Views</h4>
+            <ul className="text-sm text-oa-text-secondary space-y-1">
+              <li>• <strong>Month View</strong> - Overview with task indicators</li>
+              <li>• <strong>Week View</strong> - Weekly task breakdown</li>
+              <li>• <strong>Day View</strong> - Detailed daily schedule</li>
             </ul>
           </div>
 
-          <div className="bg-oa-bg-secondary border border-oa-border p-4">
-            <p className="text-xs text-oa-text-secondary">
-              <strong>Pro Tip:</strong> Use the chat to ask your agent to reschedule tasks.
-              Say something like "Reschedule my workout to tomorrow morning" and it will
-              intelligently adjust your schedule.
-            </p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 'contracts',
-      title: 'Commitment Contracts',
-      icon: '📜',
-      content: (
-        <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold mb-3">What are Commitment Contracts?</h3>
-            <p className="text-sm text-oa-text-secondary leading-relaxed mb-4">
-              Also known as "punishment mode" - put real money on the line to force accountability.
-              Inspired by StickK and Beeminder, contracts add financial consequences to failure.
-            </p>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-2">How Contracts Work</h4>
-            <ol className="text-sm text-oa-text-secondary space-y-2 list-decimal list-inside">
-              <li><strong>Set your stakes</strong> - How much money you'll lose if you fail ($10-$500+)</li>
-              <li><strong>Choose a referee</strong> - Someone who will verify your compliance</li>
-              <li><strong>Pick an anti-charity</strong> - Money goes to a cause you oppose if you fail</li>
-              <li><strong>Enable escalation</strong> - Stakes increase with repeated failures</li>
-              <li><strong>Define failure conditions</strong> - What counts as breaking the contract</li>
-            </ol>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-2">Contract Types</h4>
-            <div className="space-y-3 text-sm">
-              <div className="border-l-2 border-oa-border pl-3">
-                <p className="font-medium">Single Challenge Contract</p>
-                <p className="text-xs text-oa-text-secondary">Stake money on completing one specific challenge</p>
-              </div>
-              <div className="border-l-2 border-oa-border pl-3">
-                <p className="font-medium">Streak Contract</p>
-                <p className="text-xs text-oa-text-secondary">Maintain a daily streak or lose money</p>
-              </div>
-              <div className="border-l-2 border-oa-border pl-3">
-                <p className="font-medium">Weekly Goal Contract</p>
-                <p className="text-xs text-oa-text-secondary">Complete N tasks per week or pay up</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-oa-bg-secondary border border-oa-border p-4">
-            <p className="text-xs font-semibold mb-2">⚠️ Important Notes</p>
-            <ul className="text-xs text-oa-text-secondary space-y-1">
-              <li>• Contracts are self-enforced (honor system with referee verification)</li>
-              <li>• Use an amount that's meaningful but not financially harmful</li>
-              <li>• Choose a referee who will actually hold you accountable</li>
-              <li>• Anti-charities should be causes you genuinely oppose</li>
-            </ul>
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 'insights',
-      title: 'Insights & Analytics',
-      icon: '📊',
-      content: (
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Track Your Progress</h3>
-            <p className="text-sm text-oa-text-secondary leading-relaxed mb-4">
-              Insights give you a comprehensive view of your accountability journey.
-              See patterns, celebrate wins, and identify areas for improvement.
-            </p>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-2">What You'll See in Insights</h4>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="border border-oa-border p-3">
-                <p className="font-medium mb-1">Total Check-ins</p>
-                <p className="text-xs text-oa-text-secondary">How many days you've logged</p>
-              </div>
-              <div className="border border-oa-border p-3">
-                <p className="font-medium mb-1">Active Challenges</p>
-                <p className="text-xs text-oa-text-secondary">Currently in-progress goals</p>
-              </div>
-              <div className="border border-oa-border p-3">
-                <p className="font-medium mb-1">Completion Rate</p>
-                <p className="text-xs text-oa-text-secondary">% of tasks completed on time</p>
-              </div>
-              <div className="border border-oa-border p-3">
-                <p className="font-medium mb-1">Best Streak</p>
-                <p className="text-xs text-oa-text-secondary">Longest consecutive days</p>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-2">Activity Timeline</h4>
+            <h4 className="font-semibold mb-2">Auto-Navigation</h4>
             <p className="text-sm text-oa-text-secondary mb-2">
-              View your recent check-ins chronologically:
+              The calendar automatically navigates to your challenge start date.
+              If your challenge starts in the future (e.g., January 1, 2026),
+              the calendar will show that month.
             </p>
-            <ul className="text-sm text-oa-text-secondary space-y-1">
-              <li>• Date and mood rating</li>
-              <li>• Completion status</li>
-              <li>• Key wins from that day</li>
-              <li>• Commitment made for next day</li>
-            </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">Challenge Progress</h4>
+            <h4 className="font-semibold mb-2">Task Completion</h4>
             <p className="text-sm text-oa-text-secondary">
-              Each challenge shows:
-            </p>
-            <ul className="text-sm text-oa-text-secondary space-y-1">
-              <li>• Current vs best streak</li>
-              <li>• Overall progress percentage</li>
-              <li>• Status (active, completed, paused)</li>
-              <li>• Milestone achievements</li>
-            </ul>
-          </div>
-
-          <div className="bg-oa-bg-secondary border border-oa-border p-4">
-            <p className="text-xs text-oa-text-secondary">
-              <strong>Accessing Insights:</strong> Click on any agent in the left sidebar,
-              then navigate to the Insights tab. Each agent has its own separate insights page.
+              Click on any task in the calendar to toggle its completion status.
+              This updates the day file and challenge progress automatically.
             </p>
           </div>
         </div>
       ),
     },
     {
-      id: 'chat',
-      title: 'Chat & AI Assistance',
+      id: 'prompts',
+      title: 'Dynamic Prompts',
       icon: '💬',
       content: (
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold mb-3">Chatting with Your Agent</h3>
+            <h3 className="text-lg font-semibold mb-3">AI-Powered Responses</h3>
             <p className="text-sm text-oa-text-secondary leading-relaxed mb-4">
-              The center panel is your conversation space. Chat with your accountability agent
-              for guidance, planning, motivation, and support.
+              Dynamic prompts automatically match your messages and respond with
+              personalized, context-aware templates.
             </p>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">What You Can Ask</h4>
-            <div className="space-y-2 text-sm text-oa-text-secondary">
+            <h4 className="font-semibold mb-2">Available Prompts</h4>
+            <div className="space-y-2 text-sm">
               <div className="border-l-2 border-oa-border pl-3">
-                <p className="font-medium text-oa-text-primary">Planning & Strategy</p>
-                <p className="text-xs">"Help me plan my week" or "What should I prioritize?"</p>
+                <p className="font-medium">Motivation</p>
+                <p className="text-xs text-oa-text-secondary">Say: "I need motivation" or "inspire me"</p>
               </div>
               <div className="border-l-2 border-oa-border pl-3">
-                <p className="font-medium text-oa-text-primary">Scheduling</p>
-                <p className="text-xs">"Reschedule my workout to tomorrow" or "Block 2 hours for deep work"</p>
+                <p className="font-medium">Morning Check-in</p>
+                <p className="text-xs text-oa-text-secondary">Say: "Good morning" or "start my day"</p>
               </div>
               <div className="border-l-2 border-oa-border pl-3">
-                <p className="font-medium text-oa-text-primary">Motivation</p>
-                <p className="text-xs">"I'm feeling stuck" or "Celebrate my 7-day streak!"</p>
+                <p className="font-medium">Evening Review</p>
+                <p className="text-xs text-oa-text-secondary">Say: "End of day" or "wrap up"</p>
               </div>
               <div className="border-l-2 border-oa-border pl-3">
-                <p className="font-medium text-oa-text-primary">Analysis</p>
-                <p className="text-xs">"Why do I always miss Monday workouts?" or "Show me my patterns"</p>
+                <p className="font-medium">Stuck</p>
+                <p className="text-xs text-oa-text-secondary">Say: "I'm stuck" or "feeling blocked"</p>
+              </div>
+              <div className="border-l-2 border-oa-border pl-3">
+                <p className="font-medium">Celebration</p>
+                <p className="text-xs text-oa-text-secondary">Say: "I did it" or "celebrate with me"</p>
+              </div>
+              <div className="border-l-2 border-oa-border pl-3">
+                <p className="font-medium">Accountability</p>
+                <p className="text-xs text-oa-text-secondary">Say: "Hold me accountable" or "real talk"</p>
+              </div>
+              <div className="border-l-2 border-oa-border pl-3">
+                <p className="font-medium">Planning</p>
+                <p className="text-xs text-oa-text-secondary">Say: "Help me plan" or "let's organize"</p>
               </div>
             </div>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">Streaming Responses</h4>
-            <p className="text-sm text-oa-text-secondary mb-2">
-              Messages stream in real-time for a natural conversation feel.
+            <h4 className="font-semibold mb-2">Creating Custom Prompts</h4>
+            <pre className="bg-oa-bg-secondary border border-oa-border p-4 text-xs overflow-x-auto">
+{`# Your Prompt Name
+
+- **Description:** What this prompt does
+- **Keywords:** word1, word2, word3
+- **Intent:** trigger phrase 1, trigger phrase 2
+- **Category:** your-category
+- **Priority:** 10
+
+## Template
+
+Hey {{name}}! Your personalized message...
+
+Available: {{today_date}}, {{pending_tasks}},
+{{current_streak}}, {{task_list}}, etc.`}
+            </pre>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: 'backlog',
+      title: 'Backlog Handling',
+      icon: '📋',
+      content: (
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Managing Missed Tasks</h3>
+            <p className="text-sm text-oa-text-secondary leading-relaxed mb-4">
+              When you miss tasks, the system detects them as backlog and offers
+              options to recover without giving up on your challenge.
             </p>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">Chat History</h4>
-            <p className="text-sm text-oa-text-secondary mb-2">
-              All conversations are saved to markdown files:
+            <h4 className="font-semibold mb-2">Backlog Notification</h4>
+            <p className="text-sm text-oa-text-secondary mb-3">
+              A notification appears when incomplete tasks from past days are detected.
+              You'll see two options:
             </p>
-            <code className="block bg-oa-bg-secondary border border-oa-border p-3 text-xs">
-              data/chats/YYYY-MM-DD/agent-name.md
-            </code>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">Agent-Specific vs Unified Chat</h4>
-            <p className="text-sm text-oa-text-secondary">
-              Each agent has its own chat history and context. Switch agents from the left
-              sidebar to chat with different personalities and capabilities.
+            <h4 className="font-semibold mb-2">Option 1: Adjust Tomorrow</h4>
+            <ul className="text-sm text-oa-text-secondary space-y-1">
+              <li>• Moves incomplete tasks to tomorrow</li>
+              <li>• Adds a "Backlog" section to tomorrow's day file</li>
+              <li>• Preserves original task structure</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-2">Option 2: Regenerate Plan</h4>
+            <ul className="text-sm text-oa-text-secondary space-y-1">
+              <li>• Analyzes your completion pace</li>
+              <li>• Redistributes remaining tasks across future days</li>
+              <li>• Updates all future day files</li>
+              <li>• Better for significant schedule changes</li>
+            </ul>
+          </div>
+
+          <div className="bg-oa-bg-secondary border border-oa-border p-4">
+            <p className="text-xs text-oa-text-secondary">
+              <strong>Tip:</strong> Use "Adjust Tomorrow" for occasional misses.
+              Use "Regenerate Plan" if you need to restructure your entire challenge.
             </p>
           </div>
         </div>
@@ -407,154 +373,117 @@ export default function HelpPage() {
     },
     {
       id: 'file-structure',
-      title: 'File Structure',
+      title: 'Data Structure',
       icon: '📁',
       content: (
         <div className="space-y-6">
           <div>
             <h3 className="text-lg font-semibold mb-3">Understanding Your Data</h3>
             <p className="text-sm text-oa-text-secondary leading-relaxed mb-4">
-              Everything is stored in <code className="px-2 py-1 bg-oa-bg-secondary">data/</code>.
-              All files are human-readable (markdown/JSON). You can edit, backup, or version control them.
+              All data is stored in the <code className="px-2 py-1 bg-oa-bg-secondary">data/</code> folder.
+              Files are human-readable markdown and JSON.
             </p>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">Complete Directory Structure</h4>
+            <h4 className="font-semibold mb-2">Directory Structure</h4>
             <pre className="bg-oa-bg-secondary border border-oa-border p-4 text-xs overflow-x-auto leading-relaxed">
 {`data/
-├── .registry/              # System metadata
-│   └── challenges.json     # All challenges with streaks
+├── profiles/              # Per-user data
+│   └── {user-id}/
+│       ├── profile.md     # User info
+│       ├── availability.md
+│       ├── preferences.md
+│       ├── challenges/    # User's progress
+│       ├── chats/         # Chat history
+│       ├── checkins/      # Check-ins
+│       └── todos/         # Tasks
 │
-├── agents/                 # Agent configurations
-│   └── accountability-coach/
-│       ├── agent.json      # Agent config
-│       ├── context/        # Agent knowledge base
-│       ├── outputs/        # Generated summaries
-│       └── resources/      # Images, videos, files
+├── challenges/            # Challenge data
+│   └── {challenge-id}/
+│       ├── challenge.md   # Config & progress
+│       ├── plan.md        # Learning plan
+│       └── days/          # Daily tasks
 │
-├── chats/                  # Conversation history
-│   └── YYYY-MM-DD/
-│       ├── agent-name.md
-│       └── index.json      # Message index
+├── prompts/               # Global prompts
+│   ├── motivation.md
+│   ├── morning-checkin.md
+│   └── ...
 │
-├── checkins/               # Daily check-in logs
-│   └── YYYY-MM-DD.md
-│
-├── challenges/             # Challenge data
-│   └── challenge-id/
-│       ├── challenge.json  # Challenge config
-│       ├── challenge-log.md
-│       └── milestones.json
-│
-├── contracts/              # Commitment contracts
-│   └── contract-id.json
-│
-├── profile/                # User settings
-│   ├── profile.md
-│   ├── preferences.md
-│   └── motivation-triggers.md
-│
-├── schedule/               # Calendar & planning
-│   ├── calendar.json
-│   └── todos.json
-│
-└── assets/                 # User uploads
-    ├── vision-boards/
-    ├── images/
-    └── videos/`}
+├── agents/                # Agent configs
+├── chats/                 # Global chats
+├── checkins/              # Check-in records
+└── .cache-index.json      # Cache index`}
             </pre>
           </div>
 
           <div className="bg-oa-bg-secondary border border-oa-border p-4">
-            <p className="text-xs font-semibold mb-2">💡 Pro Tips</p>
+            <p className="text-xs font-semibold mb-2">Tips</p>
             <ul className="text-xs text-oa-text-secondary space-y-1">
-              <li>• Backup this directory regularly (it's your entire accountability system)</li>
-              <li>• Use git to version control your progress</li>
-              <li>• Edit markdown files directly for quick updates</li>
-              <li>• Sync across devices using Dropbox/iCloud (symlink the directory)</li>
+              <li>• Backup the data/ folder regularly</li>
+              <li>• Edit markdown files directly for quick fixes</li>
+              <li>• Delete .cache-index.json to rebuild cache</li>
+              <li>• Use Workspace page to browse files</li>
             </ul>
           </div>
         </div>
       ),
     },
     {
-      id: 'installation',
-      title: 'Installation & Setup',
-      icon: '⚙️',
+      id: 'troubleshooting',
+      title: 'Troubleshooting',
+      icon: '🔧',
       content: (
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold mb-3">Setting Up OpenAnalyst</h3>
-            <p className="text-sm text-oa-text-secondary leading-relaxed mb-4">
-              Complete guide to installing and running the accountability coach system.
-            </p>
+            <h3 className="text-lg font-semibold mb-3">Common Issues</h3>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">1. Clone the Repository</h4>
-            <code className="block bg-oa-bg-secondary border border-oa-border p-3 text-xs mb-2">
-              git clone https://github.com/yourusername/openanalyst.git
-            </code>
-            <code className="block bg-oa-bg-secondary border border-oa-border p-3 text-xs">
-              cd openanalyst/ui
-            </code>
+            <h4 className="font-semibold mb-2">Chat Not Responding</h4>
+            <ol className="text-sm text-oa-text-secondary space-y-1 list-decimal list-inside">
+              <li>Check WebSocket server is running (port 8765)</li>
+              <li>Verify profile exists in data/profiles/</li>
+              <li>Restart app with <code className="px-1 bg-oa-bg-secondary">npm start</code></li>
+            </ol>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">2. Install Dependencies</h4>
-            <code className="block bg-oa-bg-secondary border border-oa-border p-3 text-xs">
-              npm install
-            </code>
+            <h4 className="font-semibold mb-2">Profile Not Found</h4>
+            <ol className="text-sm text-oa-text-secondary space-y-1 list-decimal list-inside">
+              <li>Check data/profiles/{'{user-id}'}/profile.md exists</li>
+              <li>Delete data/.cache-index.json</li>
+              <li>Restart app to rebuild cache</li>
+            </ol>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">3. Configure API Keys</h4>
-            <p className="text-sm text-oa-text-secondary mb-2">Create a <code className="px-1 bg-oa-bg-secondary">.env</code> file:</p>
+            <h4 className="font-semibold mb-2">Ports Already in Use</h4>
             <pre className="bg-oa-bg-secondary border border-oa-border p-4 text-xs">
-{`ANTHROPIC_API_KEY=your_claude_api_key_here
-GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-1.5-pro
-OPENANALYST_DIR=data  # Optional, defaults to data/`}
+{`# Find processes
+netstat -ano | findstr ":8765 :3000"
+
+# Kill by PID
+taskkill /F /PID <pid>`}
             </pre>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">4. Run Development Server</h4>
-            <code className="block bg-oa-bg-secondary border border-oa-border p-3 text-xs mb-2">
-              npm run dev
-            </code>
-            <p className="text-xs text-oa-text-secondary">
-              Open <a href="http://localhost:3000" className="underline">http://localhost:3000</a> in your browser
-            </p>
+            <h4 className="font-semibold mb-2">Tasks Not Showing in Calendar</h4>
+            <ul className="text-sm text-oa-text-secondary space-y-1">
+              <li>• Check challenge has correct start date</li>
+              <li>• Verify day files exist in data/challenges/{'{id}'}/days/</li>
+              <li>• Ensure day files have task checkboxes</li>
+            </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">5. Run Claude Code (for AI features)</h4>
-            <code className="block bg-oa-bg-secondary border border-oa-border p-3 text-xs mb-2">
-              npx @anthropic-ai/sdk claude-code
-            </code>
-            <p className="text-xs text-oa-text-secondary">
-              This enables the chat AI, intelligent rescheduling, and agent summaries
-            </p>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-2">Getting API Keys</h4>
-            <div className="space-y-2 text-sm">
-              <div className="border-l-2 border-oa-border pl-3">
-                <p className="font-medium">Claude API (Anthropic)</p>
-                <p className="text-xs text-oa-text-secondary">
-                  Visit <a href="https://console.anthropic.com" className="underline">console.anthropic.com</a> → API Keys → Create Key
-                </p>
-              </div>
-              <div className="border-l-2 border-oa-border pl-3">
-                <p className="font-medium">Gemini API (Google)</p>
-                <p className="text-xs text-oa-text-secondary">
-                  Visit <a href="https://makersuite.google.com/app/apikey" className="underline">makersuite.google.com</a> → Create API Key
-                </p>
-              </div>
-            </div>
+            <h4 className="font-semibold mb-2">Streak Not Updating</h4>
+            <ul className="text-sm text-oa-text-secondary space-y-1">
+              <li>• Complete a check-in for the day</li>
+              <li>• Check challenge.md has correct streak format</li>
+              <li>• Verify registry at data/.registry/challenges.json</li>
+            </ul>
           </div>
         </div>
       ),

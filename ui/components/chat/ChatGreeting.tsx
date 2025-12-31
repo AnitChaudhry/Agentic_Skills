@@ -21,7 +21,7 @@ export function ChatGreeting({ agentName }: ChatGreetingProps) {
         }
       } catch (error) {
         console.error('Failed to load user profile:', error)
-        setUserName('Anit') // Default fallback
+        setUserName('') // No fallback - will show 'there'
       }
     }
     loadUserProfile()

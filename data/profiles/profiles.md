@@ -1,14 +1,14 @@
 # Profiles Registry
 
 ## Owner Profile
-- **ID:** anit-gmail-co
+- **ID:** arjun-gmail-com
 
 ## All Profiles
 
-### anit-gmail-co
-- **Name:** Anit
-- **Email:** anit@gmail.co
+### arjun-gmail-com
+- **Name:** Arjun
+- **Email:** arjun@gmail.com
 - **Created:** 2025-12-29
-- **Last Active:** 2025-12-29
+- **Last Active:** 2025-12-31
 - **Owner:** true
 

@@ -1,53 +1,25 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import LoadingScreen from '@/components/LoadingScreen'
 
 export default function Home() {
   const router = useRouter()
-  const [isChecking, setIsChecking] = useState(true)
 
   useEffect(() => {
-    const checkInitialRoute = async () => {
-      try {
-        // First, check if profiles exist
-        const res = await fetch('/api/profiles')
-        const data = await res.json()
-        const profiles = data.profiles || []
-
-        if (profiles.length === 0) {
-          // No profiles exist - new user - go to onboarding
-          router.push('/onboarding')
-        } else {
-          // Profiles exist - existing user
-          const activeProfileId = localStorage.getItem('activeProfileId')
-
-          if (!activeProfileId) {
-            // No active profile selected - show profile selector
-            router.push('/profiles')
-          } else {
-            // Active profile exists - go to streaks/challenges page (main dashboard)
-            router.push('/streak')
-          }
-        }
-      } catch (error) {
-        console.error('Failed to check initial route:', error)
-        // On error, default to onboarding
-        router.push('/onboarding')
-      } finally {
-        setIsChecking(false)
-      }
-    }
-
-    checkInitialRoute()
+    // Always redirect to profiles page first (Netflix-style)
+    // The profiles page handles the logic for new users vs existing users
+    router.replace('/profiles')
   }, [router])
 
+  // Simple loading state while redirecting
   return (
-    <LoadingScreen
-      steps={[
-        { id: 'init', label: 'Initializing...', status: isChecking ? 'loading' : 'complete' }
-      ]}
-    />
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-12 h-12 mx-auto mb-4">
+          <div className="w-full h-full border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    </div>
   )
 }

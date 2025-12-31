@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, Button } from '@/components/ui'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface Profile {
   id: string
@@ -13,10 +13,22 @@ interface Profile {
   owner: boolean
 }
 
+// Avatar colors for profiles (Netflix-style)
+const avatarColors = [
+  'from-purple-500 to-pink-500',
+  'from-blue-500 to-cyan-500',
+  'from-green-500 to-emerald-500',
+  'from-orange-500 to-red-500',
+  'from-indigo-500 to-purple-500',
+  'from-teal-500 to-green-500',
+]
+
 export default function ProfilesPage() {
   const router = useRouter()
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedProfile, setSelectedProfile] = useState<string | null>(null)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   useEffect(() => {
     loadProfiles()
@@ -34,115 +46,244 @@ export default function ProfilesPage() {
     }
   }
 
-  const handleSelectProfile = (profileId: string) => {
-    // Store active profile in localStorage
-    localStorage.setItem('activeProfileId', profileId)
+  const handleSelectProfile = (profileId: string, profileName: string) => {
+    setSelectedProfile(profileId)
+    setIsTransitioning(true)
 
-    // Redirect to root with loading
-    router.push('/')
+    // Store active profile
+    localStorage.setItem('activeProfileId', profileId)
+    localStorage.setItem('activeProfileName', profileName)
+
+    // Delay navigation for animation
+    setTimeout(() => {
+      router.push('/streak')
+    }, 1500)
   }
 
   const handleCreateProfile = () => {
     router.push('/onboarding')
   }
 
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+  }
+
+  // Loading state
   if (loading) {
     return (
-      <div className="h-screen w-screen bg-oa-bg-primary flex items-center justify-center">
-        <div className="text-oa-text-secondary">Loading profiles...</div>
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+        </motion.div>
       </div>
     )
   }
 
-  // No profiles - show centered create button
+  // Transition loading screen after profile selection
+  if (isTransitioning) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center overflow-hidden">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col items-center"
+        >
+          {/* Animated logo/orb */}
+          <motion.div
+            className="relative w-20 h-20 mb-8"
+            animate={{
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            {/* Outer glow ring */}
+            <motion.div
+              className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 blur-xl opacity-50"
+              animate={{
+                scale: [1, 1.3, 1],
+                opacity: [0.5, 0.3, 0.5]
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+            {/* Core orb */}
+            <motion.div
+              className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600"
+              animate={{ rotate: 360 }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            />
+            {/* Inner shine */}
+            <div className="absolute inset-2 rounded-full bg-gradient-to-br from-white/30 to-transparent" />
+          </motion.div>
+
+          {/* Loading dots */}
+          <div className="flex gap-1.5">
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="w-2 h-2 rounded-full bg-purple-500"
+                animate={{
+                  y: [-3, 3, -3],
+                  opacity: [0.5, 1, 0.5]
+                }}
+                transition={{
+                  duration: 0.6,
+                  repeat: Infinity,
+                  delay: i * 0.15,
+                  ease: "easeInOut"
+                }}
+              />
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // No profiles - show create profile
   if (profiles.length === 0) {
     return (
-      <div className="h-screen w-screen bg-oa-bg-primary flex items-center justify-center">
-        <div className="flex flex-col items-center gap-6">
-          <button
-            onClick={handleCreateProfile}
-            className="w-48 h-48 border-2 border-dashed border-oa-border hover:border-oa-accent
-                     bg-oa-bg-secondary hover:bg-oa-bg-tertiary transition-all rounded-2xl
-                     flex flex-col items-center justify-center gap-4 group"
+      <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          {/* Logo */}
+          <motion.div
+            className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center"
+            whileHover={{ scale: 1.05 }}
           >
-            <div className="text-6xl text-oa-text-secondary group-hover:text-oa-accent transition-colors">
-              +
-            </div>
-            <div className="text-sm font-medium text-oa-text-secondary group-hover:text-oa-accent transition-colors">
-              Create Profile
-            </div>
-          </button>
-          <p className="text-xs text-oa-text-secondary max-w-md text-center">
-            Get started by creating your first profile. Each profile has its own challenges, todos, and personalized workspace.
+            <span className="text-2xl font-bold text-white">OA</span>
+          </motion.div>
+
+          <h1 className="text-2xl font-semibold text-white mb-2">Welcome to OpenAnalyst</h1>
+          <p className="text-gray-400 text-sm mb-8 max-w-sm">
+            Your AI-powered accountability coach. Create your profile to get started.
           </p>
-        </div>
+
+          <motion.button
+            onClick={handleCreateProfile}
+            className="group relative px-8 py-4 rounded-xl overflow-hidden"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {/* Button gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 transition-all group-hover:opacity-90" />
+            <div className="relative flex items-center gap-3 text-white font-medium">
+              <span className="text-xl">+</span>
+              <span>Create Your Profile</span>
+            </div>
+          </motion.button>
+        </motion.div>
       </div>
     )
   }
 
-  // Has profiles - show grid with profile cards
+  // Has profiles - Netflix-style grid
   return (
-    <div className="h-screen w-screen bg-oa-bg-primary flex items-center justify-center p-8">
-      <div className="max-w-5xl w-full">
-        <h1 className="text-3xl font-bold text-oa-text-primary mb-2 text-center">
-          Select Profile
-        </h1>
-        <p className="text-sm text-oa-text-secondary mb-8 text-center">
-          Choose a profile to continue or create a new one
-        </p>
+    <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-6">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-12"
+      >
+        {/* Logo */}
+        <div className="w-12 h-12 mx-auto mb-6 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+          <span className="text-lg font-bold text-white">OA</span>
+        </div>
+        <h1 className="text-3xl font-medium text-white mb-2">Who's coaching today?</h1>
+      </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {/* Existing profile cards */}
-          {profiles.map((profile) => (
-            <button
+      {/* Profile Grid */}
+      <motion.div
+        className="flex flex-wrap justify-center gap-6 max-w-3xl"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        <AnimatePresence>
+          {profiles.map((profile, index) => (
+            <motion.button
               key={profile.id}
-              onClick={() => handleSelectProfile(profile.id)}
-              className="w-full text-left"
+              onClick={() => handleSelectProfile(profile.id, profile.name)}
+              className="group flex flex-col items-center gap-3"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <Card className="p-6 cursor-pointer hover:border-oa-accent transition-all group">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-20 h-20 rounded-full bg-oa-accent/10 flex items-center justify-center
-                                text-3xl group-hover:bg-oa-accent/20 transition-colors">
-                    👤
-                  </div>
-                  <div className="text-center">
-                    <div className="font-semibold text-oa-text-primary">
-                      {profile.name}
-                    </div>
-                    {profile.owner && (
-                      <div className="text-xs text-oa-text-secondary mt-1 flex items-center justify-center gap-1">
-                        <span>🔒</span>
-                        <span>Owner</span>
-                      </div>
-                    )}
-                    <div className="text-xs text-oa-text-secondary mt-2">
-                      Active: {profile.lastActive}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </button>
+              {/* Avatar */}
+              <div className={`relative w-28 h-28 rounded-lg bg-gradient-to-br ${avatarColors[index % avatarColors.length]}
+                            flex items-center justify-center overflow-hidden
+                            ring-0 group-hover:ring-4 ring-white/50 transition-all duration-200`}>
+                <span className="text-3xl font-bold text-white">
+                  {getInitials(profile.name)}
+                </span>
+                {/* Hover overlay */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+              </div>
+
+              {/* Name */}
+              <span className="text-gray-400 group-hover:text-white transition-colors text-sm">
+                {profile.name}
+              </span>
+            </motion.button>
           ))}
 
-          {/* Create new profile card */}
-          <button onClick={handleCreateProfile} className="w-full">
-            <Card className="p-6 cursor-pointer border-dashed hover:border-oa-accent transition-all group">
-              <div className="flex flex-col items-center gap-4 h-full justify-center">
-                <div className="w-20 h-20 rounded-full border-2 border-dashed border-oa-border
-                              group-hover:border-oa-accent flex items-center justify-center text-4xl
-                              text-oa-text-secondary group-hover:text-oa-accent transition-all">
-                  +
-                </div>
-                <div className="text-center">
-                  <div className="font-semibold text-oa-text-secondary group-hover:text-oa-accent transition-colors">
-                    Create Profile
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </button>
-        </div>
-      </div>
+          {/* Add Profile Button */}
+          <motion.button
+            onClick={handleCreateProfile}
+            className="group flex flex-col items-center gap-3"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: profiles.length * 0.1 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {/* Avatar placeholder */}
+            <div className="w-28 h-28 rounded-lg border-2 border-dashed border-gray-600
+                          group-hover:border-gray-400 flex items-center justify-center
+                          transition-all duration-200">
+              <span className="text-4xl text-gray-600 group-hover:text-gray-400 transition-colors">+</span>
+            </div>
+
+            {/* Label */}
+            <span className="text-gray-500 group-hover:text-gray-300 transition-colors text-sm">
+              Add Profile
+            </span>
+          </motion.button>
+        </AnimatePresence>
+      </motion.div>
+
+      {/* Manage Profiles link */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="mt-12 px-6 py-2 text-sm text-gray-500 border border-gray-700 rounded-md
+                 hover:text-white hover:border-gray-500 transition-colors"
+      >
+        Manage Profiles
+      </motion.button>
     </div>
   )
 }

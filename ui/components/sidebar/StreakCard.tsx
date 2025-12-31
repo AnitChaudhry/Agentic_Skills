@@ -2,23 +2,37 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
+import { MessageCircle } from 'lucide-react'
 import type { Challenge } from '@/types'
 
 interface StreakCardProps {
   challenge: Challenge
+  onCheckin?: (challenge: Challenge) => void
 }
 
-export function StreakCard({ challenge }: StreakCardProps) {
+export function StreakCard({ challenge, onCheckin }: StreakCardProps) {
   const router = useRouter()
 
   const handleClick = () => {
+    // Trigger check-in flow
+    if (onCheckin) {
+      onCheckin(challenge)
+    } else {
+      // Default: navigate to chat with check-in message
+      const checkinMessage = encodeURIComponent(`Check in for challenge: ${challenge.name}`)
+      router.push(`/chat?agent=accountability-coach&message=${checkinMessage}`)
+    }
+  }
+
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.stopPropagation()
     router.push(`/streak/${challenge.id}`)
   }
 
   return (
     <button
       onClick={handleClick}
-      className="w-full text-left p-4 rounded-lg border border-oa-border hover:border-oa-accent bg-oa-bg-primary hover:bg-oa-bg-secondary transition-all group"
+      className="w-full text-left p-4 rounded-lg border border-oa-border hover:border-oa-accent bg-oa-bg-primary hover:bg-oa-bg-secondary transition-all group cursor-pointer"
     >
       {/* Header with name and progress */}
       <div className="flex items-start justify-between mb-3">
@@ -55,11 +69,15 @@ export function StreakCard({ challenge }: StreakCardProps) {
         )}
       </div>
 
-      {/* Type badge */}
-      <div className="mt-2 flex items-center gap-2">
+      {/* Type badge and check-in hint */}
+      <div className="mt-2 flex items-center justify-between">
         <span className="text-xs text-oa-text-secondary capitalize">
           {challenge.type}
         </span>
+        <div className="flex items-center gap-1 text-xs text-oa-accent/70 opacity-0 group-hover:opacity-100 transition-opacity">
+          <MessageCircle size={12} />
+          <span>Check in</span>
+        </div>
       </div>
     </button>
   )

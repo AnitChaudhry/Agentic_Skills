@@ -5,7 +5,7 @@ type MessageHandler = (message: WebSocketMessage) => void
 type ConnectionHandler = (connected: boolean) => void
 
 export interface WebSocketMessage {
-  type: 'register' | 'registered' | 'chat' | 'status' | 'file_update' | 'error' | 'typing' | 'response_start' | 'response_chunk' | 'response_end'
+  type: 'register' | 'registered' | 'chat' | 'status' | 'file_update' | 'error' | 'typing' | 'response_start' | 'response_chunk' | 'response_end' | 'skill_start' | 'skill_complete'
   agentId?: string
   content?: string
   data?: Record<string, any>
@@ -13,6 +13,13 @@ export interface WebSocketMessage {
   requestId?: string
   clientType?: 'ui' | 'claude-cli'
   fullContent?: string
+  // Skill execution fields
+  skillId?: string
+  skillName?: string
+  skillUsed?: string
+  success?: boolean
+  actions?: Array<{ type: string; description: string; timestamp: string }>
+  dataUpdated?: string[]
 }
 
 export interface PendingRequest {
@@ -25,11 +32,17 @@ export interface PendingRequest {
 export type StreamingCallback = (event: StreamingEvent) => void
 
 export interface StreamingEvent {
-  type: 'start' | 'chunk' | 'end' | 'error'
+  type: 'start' | 'chunk' | 'end' | 'error' | 'skill_start' | 'skill_complete'
   requestId: string
   content?: string        // For 'chunk' events
   fullContent?: string    // For 'end' events
   error?: string          // For 'error' events
+  // Skill execution fields
+  skillId?: string
+  skillName?: string
+  success?: boolean
+  actions?: Array<{ type: string; description: string; timestamp: string }>
+  dataUpdated?: string[]
 }
 
 class WebSocketClient {
@@ -344,6 +357,40 @@ class WebSocketClient {
 
       case 'typing':
         // Claude Code is typing
+        break
+
+      case 'skill_start':
+        // A skill is being executed
+        console.log('[WebSocket] Skill execution started:', message.skillId, message.skillName)
+        if (message.requestId) {
+          const callback = this.streamingCallbacks.get(message.requestId)
+          if (callback) {
+            callback({
+              type: 'skill_start',
+              requestId: message.requestId,
+              skillId: message.skillId,
+              skillName: message.skillName
+            })
+          }
+        }
+        break
+
+      case 'skill_complete':
+        // Skill execution completed
+        console.log('[WebSocket] Skill execution completed:', message.skillId, message.success)
+        if (message.requestId) {
+          const callback = this.streamingCallbacks.get(message.requestId)
+          if (callback) {
+            callback({
+              type: 'skill_complete',
+              requestId: message.requestId,
+              skillId: message.skillId,
+              success: message.success,
+              actions: message.actions,
+              dataUpdated: message.dataUpdated
+            })
+          }
+        }
         break
     }
   }

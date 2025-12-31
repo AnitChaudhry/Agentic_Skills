@@ -3,6 +3,13 @@ import fs from 'fs/promises'
 import path from 'path'
 import { DATA_DIR, PATHS } from '@/lib/paths'
 
+// Helper to get agents array from data (handles both formats)
+function getAgentsArray(data: any): any[] {
+  if (Array.isArray(data)) return data
+  if (data.agents && Array.isArray(data.agents)) return data.agents
+  return []
+}
+
 // GET - List skills attached to this agent
 export async function GET(
   request: NextRequest,
@@ -14,7 +21,8 @@ export async function GET(
 
     // Read agents.json to find this agent
     const agentsContent = await fs.readFile(agentsFile, 'utf-8')
-    const agents = JSON.parse(agentsContent)
+    const agentsData = JSON.parse(agentsContent)
+    const agents = getAgentsArray(agentsData)
 
     const agent = agents.find((a: any) => a.id === agentId)
 
@@ -48,7 +56,8 @@ export async function PUT(
 
     // Read agents.json
     const agentsContent = await fs.readFile(agentsFile, 'utf-8')
-    const agents = JSON.parse(agentsContent)
+    const agentsData = JSON.parse(agentsContent)
+    const agents = getAgentsArray(agentsData)
 
     // Find and update the agent
     const agentIndex = agents.findIndex((a: any) => a.id === agentId)
@@ -62,8 +71,12 @@ export async function PUT(
 
     agents[agentIndex].skills = skills
 
-    // Write back to agents.json
-    await fs.writeFile(agentsFile, JSON.stringify(agents, null, 2), 'utf-8')
+    // Write back to agents.json (preserve structure)
+    const outputData = {
+      agents: agents,
+      lastUpdated: new Date().toISOString()
+    }
+    await fs.writeFile(agentsFile, JSON.stringify(outputData, null, 2), 'utf-8')
 
     // Also update the agent's metadata file and agent.md
     const agentDir = path.join(DATA_DIR, 'agents', agentId)

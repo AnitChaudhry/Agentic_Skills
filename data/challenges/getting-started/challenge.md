@@ -4,7 +4,7 @@
 - **ID:** getting-started
 - **Type:** learning
 - **Status:** pending
-- **Start Date:** 2025-12-30
+- **Start Date:** 2026-01-01
 - **Target Date:** 
 - **Daily Hours:** 0.5
 - **Agent:** accountability-coach

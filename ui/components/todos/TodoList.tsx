@@ -1,7 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Check, Trash2, Sparkles, Flag } from 'lucide-react'
+import { Check, Trash2, Sparkles, Flag, MessageCircle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 interface Todo {
   id: string
@@ -10,12 +11,15 @@ interface Todo {
   priority: 'high' | 'medium' | 'low'
   dueDate?: string
   aiGenerated: boolean
+  challengeId?: string
+  challengeName?: string
 }
 
 interface TodoListProps {
   todos: Todo[]
   onToggle: (id: string) => void
   onDelete: (id: string) => void
+  onCheckin?: (todo: Todo) => void
 }
 
 const priorityColors = {
@@ -30,8 +34,21 @@ const priorityIcons = {
   low: '🟢',
 }
 
-export default function TodoList({ todos, onToggle, onDelete }: TodoListProps) {
+export default function TodoList({ todos, onToggle, onDelete, onCheckin }: TodoListProps) {
+  const router = useRouter()
   const safeTodos = Array.isArray(todos) ? todos : []
+
+  // Handle card click for check-in
+  const handleCardClick = (todo: Todo) => {
+    if (onCheckin) {
+      onCheckin(todo)
+    } else {
+      // Default: navigate to chat with check-in message
+      const checkinMessage = encodeURIComponent(`Check in for: ${todo.text}`)
+      router.push(`/chat?agent=accountability-coach&message=${checkinMessage}`)
+    }
+  }
+
   return (
     <div className="space-y-3">
       {safeTodos.map((todo, index) => (
@@ -41,11 +58,12 @@ export default function TodoList({ todos, onToggle, onDelete }: TodoListProps) {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 20 }}
           transition={{ delay: index * 0.05 }}
+          onClick={() => handleCardClick(todo)}
           className={`
-            glass rounded-xl p-4 border-l-4 transition-all
+            glass rounded-xl p-4 border-l-4 transition-all cursor-pointer
             ${priorityColors[todo.priority]}
             ${todo.completed ? 'opacity-60' : ''}
-            hover:scale-[1.01]
+            hover:scale-[1.02] hover:shadow-lg hover:border-oa-accent/50
           `}
         >
           <div className="flex items-start gap-4">
@@ -53,7 +71,10 @@ export default function TodoList({ todos, onToggle, onDelete }: TodoListProps) {
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => onToggle(todo.id)}
+              onClick={(e) => {
+                e.stopPropagation()
+                onToggle(todo.id)
+              }}
               className={`
                 flex-shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all
                 ${todo.completed
@@ -99,13 +120,24 @@ export default function TodoList({ todos, onToggle, onDelete }: TodoListProps) {
                   Due: {new Date(todo.dueDate).toLocaleDateString()}
                 </p>
               )}
+
+              {/* Check-in hint */}
+              {!todo.completed && (
+                <div className="flex items-center gap-1 mt-2 text-xs text-oa-accent/70">
+                  <MessageCircle size={12} />
+                  <span>Click to check in</span>
+                </div>
+              )}
             </div>
 
             {/* Delete Button */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => onDelete(todo.id)}
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete(todo.id)
+              }}
               className="flex-shrink-0 p-2 hover:bg-red-500/20 rounded-lg transition-colors group"
             >
               <Trash2 size={16} className="text-white/40 group-hover:text-red-400" />

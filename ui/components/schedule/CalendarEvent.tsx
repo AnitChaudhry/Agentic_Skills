@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Check, X, Clock, MoreVertical, AlertTriangle } from 'lucide-react'
+import { Check, X, Clock, MoreVertical, AlertTriangle, MessageCircle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import RescheduleModal from './RescheduleModal'
 
 interface CalendarEventProps {
@@ -17,6 +18,7 @@ interface CalendarEventProps {
   }
   onStatusChange?: (id: string, status: 'completed' | 'cancelled') => void
   onReschedule?: (id: string) => void
+  onCheckin?: (event: CalendarEventProps['event']) => void
   hasConflict?: boolean
   isCompact?: boolean
 }
@@ -33,9 +35,11 @@ export function CalendarEvent({
   event,
   onStatusChange,
   onReschedule,
+  onCheckin,
   hasConflict = false,
   isCompact = false,
 }: CalendarEventProps) {
+  const router = useRouter()
   const [showMenu, setShowMenu] = useState(false)
   const [showRescheduleModal, setShowRescheduleModal] = useState(false)
 
@@ -78,8 +82,18 @@ export function CalendarEvent({
   }
 
   const handleEventClick = () => {
-    // Open reschedule modal when clicking on the event
-    if (event.time) {
+    // Trigger check-in when clicking on the event
+    if (event.status !== 'completed' && event.status !== 'cancelled') {
+      if (onCheckin) {
+        onCheckin(event)
+      } else {
+        // Default: navigate to chat with check-in message
+        const challengeInfo = event.challengeName ? ` for ${event.challengeName}` : ''
+        const checkinMessage = encodeURIComponent(`Check in${challengeInfo}: ${event.title}`)
+        router.push(`/chat?agent=accountability-coach&message=${checkinMessage}`)
+      }
+    } else if (event.time) {
+      // If already completed/cancelled, show reschedule modal
       setShowRescheduleModal(true)
     }
   }

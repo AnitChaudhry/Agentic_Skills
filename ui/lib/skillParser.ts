@@ -40,10 +40,11 @@ function parseFrontmatter(content: string): { frontmatter: Record<string, any>; 
 
 /**
  * Parse SKILL.md frontmatter to extract metadata
+ * Supports both folder-based (skillPath is a directory) and file-based (skillPath is a .md file)
  */
-export async function parseSkillManifest(skillPath: string): Promise<SkillManifest | null> {
+export async function parseSkillManifest(skillPath: string, isFileBased = false): Promise<SkillManifest | null> {
   try {
-    const skillMdPath = path.join(skillPath, 'SKILL.md')
+    const skillMdPath = isFileBased ? skillPath : path.join(skillPath, 'SKILL.md')
     const content = await fs.readFile(skillMdPath, 'utf-8')
 
     const { frontmatter, body } = parseFrontmatter(content)
@@ -136,16 +137,21 @@ function inferCategory(name: string, description: string): string {
 
 /**
  * Scan a directory for all skills
+ * Supports both:
+ * 1. Folder-based: skills/{name}/SKILL.md (OpenAnalyst format)
+ * 2. File-based: skills/{name}.md (Claude official format)
  */
 export async function scanSkillsDirectory(
   skillsDir: string,
   currentDay?: number // Optional: for computing isLocked
 ): Promise<Skill[]> {
   const skills: Skill[] = []
+  const loadedIds = new Set<string>()
 
   try {
     const entries = await fs.readdir(skillsDir, { withFileTypes: true })
 
+    // 1. Load folder-based skills (OpenAnalyst format)
     for (const entry of entries) {
       if (entry.isDirectory()) {
         const skillPath = path.join(skillsDir, entry.name)
@@ -166,6 +172,7 @@ export async function scanSkillsDirectory(
             ? currentDay !== undefined && currentDay < manifest.unlockDay
             : false
 
+          loadedIds.add(entry.name)
           skills.push({
             id: entry.name,
             name: manifest.name,
@@ -179,6 +186,47 @@ export async function scanSkillsDirectory(
             triggers: manifest.triggers,
             allowedTools: manifest.allowedTools,
             // Pack and unlock fields
+            pack: manifest.pack,
+            packDisplayName: manifest.packDisplayName,
+            packValue: manifest.packValue,
+            source: manifest.source,
+            unlockDay: manifest.unlockDay,
+            isLocked,
+            isPremium: manifest.isPremium,
+            revealMessage: manifest.revealMessage,
+          })
+        }
+      }
+    }
+
+    // 2. Load file-based skills (Claude official format - single .md files)
+    for (const entry of entries) {
+      if (entry.isFile() && entry.name.endsWith('.md')) {
+        const skillId = entry.name.replace('.md', '')
+
+        // Skip if folder-based version already loaded
+        if (loadedIds.has(skillId)) continue
+
+        const skillPath = path.join(skillsDir, entry.name)
+        const manifest = await parseSkillManifest(skillPath, true) // isFileBased = true
+
+        if (manifest) {
+          const isLocked = manifest.unlockDay
+            ? currentDay !== undefined && currentDay < manifest.unlockDay
+            : false
+
+          skills.push({
+            id: skillId,
+            name: manifest.name,
+            description: manifest.description,
+            category: manifest.category as any,
+            path: skillPath,
+            isInstalled: true,
+            isActive: false,
+            version: manifest.version,
+            author: manifest.author,
+            triggers: manifest.triggers,
+            allowedTools: manifest.allowedTools,
             pack: manifest.pack,
             packDisplayName: manifest.packDisplayName,
             packValue: manifest.packValue,

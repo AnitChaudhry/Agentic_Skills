@@ -3,8 +3,9 @@
 import React, { useEffect, useState } from 'react'
 import { useAgentStore } from '@/lib/store'
 import { SkillDetailModal } from '@/components/skills/SkillDetailModal'
+import { SkillImportModal } from '@/components/skills/SkillImportModal'
 import type { Skill } from '@/types/skill'
-import { BookOpen, Users, Plus, X, Lock, Package, Sparkles, Gift } from 'lucide-react'
+import { BookOpen, Users, Plus, X, Lock, Package, Sparkles, Gift, Download } from 'lucide-react'
 import { SkillRevealModal } from '@/components/skills/SkillRevealModal'
 
 interface SkillPack {
@@ -24,6 +25,7 @@ export default function SkillsPage() {
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [showRevealModal, setShowRevealModal] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
   const [newlyUnlockedSkills, setNewlyUnlockedSkills] = useState<Skill[]>([])
 
   useEffect(() => {
@@ -273,9 +275,18 @@ export default function SkillsPage() {
     <div className="flex flex-col h-full bg-oa-bg-primary">
       {/* Header */}
       <div className="px-8 py-6 border-b border-oa-border">
-        <h1 className="text-2xl font-semibold text-oa-text-primary mb-2">
-          Skills Marketplace
-        </h1>
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-2xl font-semibold text-oa-text-primary">
+            Skills Marketplace
+          </h1>
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-oa-accent text-white rounded-lg hover:bg-oa-accent/90 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Skill
+          </button>
+        </div>
         <div className="flex items-center gap-4 text-sm text-oa-text-secondary">
           <span>{skills.length} total skills</span>
           <span className="text-oa-accent">{unlockedCount} available</span>
@@ -363,6 +374,16 @@ export default function SkillsPage() {
           setShowRevealModal(false)
           setNewlyUnlockedSkills([])
           handleViewSkill(skillId)
+        }}
+      />
+
+      {/* Skill Import Modal */}
+      <SkillImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImported={() => {
+          loadSkills()
+          setShowImportModal(false)
         }}
       />
     </div>

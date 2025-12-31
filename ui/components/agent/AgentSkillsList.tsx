@@ -1,21 +1,22 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Plus } from 'lucide-react'
 import type { Agent } from '@/types'
 import type { Skill } from '@/types/skill'
+import { AgentSkillSelector } from './AgentSkillSelector'
 
 interface AgentSkillsListProps {
   agent: Agent
   onSkillRemoved?: () => void
+  onSkillsChanged?: (skills: string[]) => void
 }
 
-export function AgentSkillsList({ agent, onSkillRemoved }: AgentSkillsListProps) {
-  const router = useRouter()
+export function AgentSkillsList({ agent, onSkillRemoved, onSkillsChanged }: AgentSkillsListProps) {
   const [activeSkills, setActiveSkills] = useState<Skill[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [showSelector, setShowSelector] = useState(false)
 
   useEffect(() => {
     loadActiveSkills()
@@ -28,7 +29,7 @@ export function AgentSkillsList({ agent, onSkillRemoved }: AgentSkillsListProps)
       const skillsData = await skillsRes.json()
 
       const agentActiveSkills = skillsData.skills?.filter((skill: Skill) =>
-        agent.skills.includes(skill.id)
+        agent.skills?.includes(skill.id)
       ) || []
 
       setActiveSkills(agentActiveSkills)
@@ -41,7 +42,7 @@ export function AgentSkillsList({ agent, onSkillRemoved }: AgentSkillsListProps)
 
   const handleRemoveSkill = async (skillId: string) => {
     try {
-      const newSkills = agent.skills.filter((id) => id !== skillId)
+      const newSkills = (agent.skills || []).filter((id) => id !== skillId)
 
       await fetch(`/api/agents/${agent.id}/skills`, {
         method: 'PUT',
@@ -51,13 +52,19 @@ export function AgentSkillsList({ agent, onSkillRemoved }: AgentSkillsListProps)
 
       await loadActiveSkills()
       onSkillRemoved?.()
+      onSkillsChanged?.(newSkills)
     } catch (error) {
       console.error('Failed to remove skill:', error)
     }
   }
 
   const handleAddSkills = () => {
-    router.push('/skills')
+    setShowSelector(true)
+  }
+
+  const handleSkillsSaved = (newSkills: string[]) => {
+    loadActiveSkills()
+    onSkillsChanged?.(newSkills)
   }
 
   if (isLoading) {
@@ -128,6 +135,17 @@ export function AgentSkillsList({ agent, onSkillRemoved }: AgentSkillsListProps)
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Skill Selector Modal */}
+      {showSelector && (
+        <AgentSkillSelector
+          agentId={agent.id}
+          agentName={agent.name}
+          currentSkills={agent.skills || []}
+          onClose={() => setShowSelector(false)}
+          onSave={handleSkillsSaved}
+        />
+      )}
     </div>
   )
 }

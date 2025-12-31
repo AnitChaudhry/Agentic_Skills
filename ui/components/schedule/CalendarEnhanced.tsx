@@ -235,7 +235,10 @@ export function CalendarEnhanced({
           {/* View mode buttons */}
           <div className="flex border border-oa-border rounded-lg overflow-hidden">
             <button
-              onClick={() => setViewMode('month')}
+              onClick={() => {
+                setViewMode('month')
+                setCurrentDate(new Date()) // Navigate to current month
+              }}
               className={`px-3 py-1.5 text-sm ${
                 viewMode === 'month'
                   ? 'bg-oa-accent text-white'
@@ -245,7 +248,10 @@ export function CalendarEnhanced({
               Month
             </button>
             <button
-              onClick={() => setViewMode('week')}
+              onClick={() => {
+                setViewMode('week')
+                setCurrentDate(new Date()) // Navigate to current week
+              }}
               className={`px-3 py-1.5 text-sm border-x border-oa-border ${
                 viewMode === 'week'
                   ? 'bg-oa-accent text-white'
@@ -255,7 +261,10 @@ export function CalendarEnhanced({
               Week
             </button>
             <button
-              onClick={() => setViewMode('day')}
+              onClick={() => {
+                setViewMode('day')
+                setCurrentDate(new Date()) // Navigate to today
+              }}
               className={`px-3 py-1.5 text-sm ${
                 viewMode === 'day'
                   ? 'bg-oa-accent text-white'

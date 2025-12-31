@@ -37,11 +37,10 @@ This guide covers everything you need to get started with your AI-powered accoun
    - Daily hours configuration
    - Access via Settings in left sidebar
 
-6. **Claude Code Chat Streaming**
-   - Real-time streaming responses (like ChatGPT)
+6. **Chat Streaming**
+   - Real-time streaming responses
    - Agent-specific personalities
    - Conversation history per agent
-   - Powered by Claude Sonnet 4.5
    - API: `/api/chat/stream`
 
 7. **Comprehensive Help System**

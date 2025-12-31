@@ -86,6 +86,56 @@ export default function StreakDetailPage() {
     }
   }
 
+  const handleToggleTask = async (
+    challengeId: string,
+    day: number,
+    taskText: string,
+    completed: boolean,
+    activityIndex: number,
+    taskIndex: number
+  ) => {
+    try {
+      const res = await fetch('/api/todos/challenge-task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          challengeId,
+          day,
+          title: taskText,
+          completed,
+        }),
+      })
+
+      const data = await res.json()
+      if (data.success) {
+        // Update local state immediately for responsive UI
+        setActivityHistory(prev => {
+          const updated = [...prev]
+          if (updated[activityIndex]?.tasks?.[taskIndex]) {
+            updated[activityIndex].tasks[taskIndex].completed = completed
+
+            // Check if all tasks in this day are completed
+            const allCompleted = updated[activityIndex].tasks.every((t: any) => t.completed)
+            updated[activityIndex].status = allCompleted ? 'completed' : 'pending'
+          }
+          return updated
+        })
+
+        // Update challenge progress
+        if (challenge) {
+          setChallenge({
+            ...challenge,
+            progress: data.progress || challenge.progress
+          })
+        }
+      } else {
+        console.error('Failed to toggle task:', data.error)
+      }
+    } catch (error) {
+      console.error('Failed to toggle task:', error)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -406,16 +456,20 @@ export default function StreakDetailPage() {
                     {activity.tasks && activity.tasks.length > 0 && (
                       <div className="space-y-1.5">
                         {activity.tasks.map((task: any, i: number) => (
-                          <div key={i} className="flex items-start gap-2">
+                          <button
+                            key={i}
+                            className="flex items-start gap-2 w-full text-left hover:bg-oa-bg-tertiary/50 rounded p-1 -ml-1 transition-colors group"
+                            onClick={() => handleToggleTask(challengeId, activity.day, task.text, !task.completed, idx, i)}
+                          >
                             {task.completed ? (
                               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                             ) : (
-                              <div className="w-4 h-4 rounded border border-oa-border mt-0.5 flex-shrink-0" />
+                              <div className="w-4 h-4 rounded border-2 border-oa-border group-hover:border-oa-accent mt-0.5 flex-shrink-0 transition-colors" />
                             )}
                             <span className={`text-sm ${task.completed ? 'text-oa-text-secondary line-through' : 'text-oa-text-primary'}`}>
                               {task.text}
                             </span>
-                          </div>
+                          </button>
                         ))}
                       </div>
                     )}

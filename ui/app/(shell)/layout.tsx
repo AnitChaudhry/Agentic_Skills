@@ -7,6 +7,7 @@ import { LeftSidebar } from '@/components/shell/LeftSidebar'
 import { CenterChat } from '@/components/shell/CenterChat'
 import { RightPanel } from '@/components/shell/RightPanel'
 import { QuickCheckin } from '@/components/global/QuickCheckin'
+import { BacklogNotification } from '@/components/backlog'
 
 export default function ShellLayout({
   children,
@@ -16,11 +17,22 @@ export default function ShellLayout({
   const searchParams = useSearchParams()
   const isOnboarding = searchParams?.get('onboarding') === 'true'
 
+  const centerContent = (
+    <div className="flex flex-col h-full">
+      <div className="px-4 pt-4">
+        <BacklogNotification />
+      </div>
+      <div className="flex-1 overflow-hidden">
+        {children || <CenterChat />}
+      </div>
+    </div>
+  )
+
   return (
     <>
       <Shell
         left={<LeftSidebar />}
-        center={children || <CenterChat />}
+        center={centerContent}
         right={!isOnboarding ? <RightPanel /> : null}
       />
       <QuickCheckin />

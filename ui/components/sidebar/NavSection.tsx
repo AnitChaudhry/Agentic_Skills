@@ -38,6 +38,7 @@ export function NavSection({ title, href, icon, count }: NavSectionProps) {
     'settings': Icons.Settings,
     'target': Icons.Target,
     'trophy': Icons.Trophy,
+    'folder': Icons.Folder,
   }
 
   const IconComponent = iconMap[icon] || Icons.Circle

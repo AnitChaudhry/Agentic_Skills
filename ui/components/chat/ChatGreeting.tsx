@@ -29,7 +29,7 @@ export function ChatGreeting({ agentName }: ChatGreetingProps) {
 
   const getSubtitle = () => {
     if (agentName) {
-      return `Your personal ${agentName} - powered by Claude`
+      return `Your personal ${agentName}`
     }
     return 'Ask anything - access all users, challenges, and data'
   }

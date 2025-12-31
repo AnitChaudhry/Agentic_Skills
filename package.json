@@ -1,7 +1,7 @@
 {
   "name": "openanalyst-accountability-coach",
   "version": "1.1.0",
-  "description": "Your Personal Accountability Coach - powered by Claude Code",
+  "description": "Your Personal Accountability Coach",
   "main": "lib/index.js",
   "scripts": {
     "start": "node scripts/start-all.js",

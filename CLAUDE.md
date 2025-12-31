@@ -1,14 +1,14 @@
-# OpenAnalyst - Powered by Claude
+# OpenAnalyst Accountability Coach
 
 ## 🧠 Architecture
 
-**OpenAnalyst is the accountability coach app. Claude powers the AI behind it.**
+**OpenAnalyst is the accountability coach app.**
 
 The user sees the OpenAnalyst chat UI. Behind the scenes:
 - Messages come via WebSocket
-- Claude generates intelligent responses using cached user data
+- AI generates intelligent responses using cached user data
 - Responses stream back to the UI in real-time
-- User experiences "OpenAnalyst" as their coach (powered by Claude)
+- User experiences "OpenAnalyst" as their coach
 
 ```
 User (OpenAnalyst UI) → WebSocket → Claude AI → Response → User sees coach reply
@@ -374,9 +374,9 @@ npm start
 **Key Points:**
 - Profile ID is detected dynamically (works for any user)
 - Responses are generated instantly (0-2ms) from cache
-- Branding: "OpenAnalyst powered by Claude"
+- Branding: "OpenAnalyst Accountability Coach"
 - No manual intervention needed - auto-response is enabled
 
 ---
 
-**OpenAnalyst is the product. Claude is the brain powering it.**
+**OpenAnalyst is your personal accountability coach.**

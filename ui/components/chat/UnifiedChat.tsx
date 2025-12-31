@@ -163,7 +163,7 @@ ${firstStep.getMessage({})}`
 
         if (isFirstTime) {
           // First-time onboarding - save user profile
-          await fetch('/api/user/onboarding', {
+          const onboardingRes = await fetch('/api/user/onboarding', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -172,6 +172,12 @@ ${firstStep.getMessage({})}`
               completedAt: new Date().toISOString(),
             }),
           })
+          const onboardingData = await onboardingRes.json()
+
+          // Save activeProfileId to localStorage
+          if (onboardingData.userId) {
+            localStorage.setItem('activeProfileId', onboardingData.userId)
+          }
         }
 
         // Create the challenge from responses

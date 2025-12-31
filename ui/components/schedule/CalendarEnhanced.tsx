@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { CalendarEvent } from './CalendarEvent'
 import { CalendarWeek } from './CalendarWeek'
@@ -29,10 +29,37 @@ export function CalendarEnhanced({
   onEventStatusChange,
   onEventReschedule,
 }: CalendarEnhancedProps) {
+  // Find the earliest event date to initialize calendar view
+  const earliestEventDate = useMemo(() => {
+    if (events.length === 0) return new Date()
+
+    const dates = events
+      .map(e => new Date(e.date))
+      .filter(d => !isNaN(d.getTime()))
+      .sort((a, b) => a.getTime() - b.getTime())
+
+    return dates.length > 0 ? dates[0] : new Date()
+  }, [events])
+
   const [currentDate, setCurrentDate] = useState(new Date())
   const [viewMode, setViewMode] = useState<ViewMode>('month')
   const [dateRangeStart, setDateRangeStart] = useState<Date | null>(null)
   const [dateRangeEnd, setDateRangeEnd] = useState<Date | null>(null)
+  const [hasInitialized, setHasInitialized] = useState(false)
+
+  // Navigate to earliest event date when events load (for future-dated challenges)
+  useEffect(() => {
+    if (!hasInitialized && events.length > 0) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      // If earliest event is in the future, navigate to that month
+      if (earliestEventDate.getTime() > today.getTime()) {
+        setCurrentDate(new Date(earliestEventDate))
+      }
+      setHasInitialized(true)
+    }
+  }, [events, earliestEventDate, hasInitialized])
 
   const filteredEvents = events.filter((event) => {
     if (!dateRangeStart || !dateRangeEnd) return true
@@ -67,6 +94,17 @@ export function CalendarEnhanced({
   const goToToday = () => {
     setCurrentDate(new Date())
   }
+
+  const goToChallengeStart = () => {
+    setCurrentDate(new Date(earliestEventDate))
+  }
+
+  // Check if we're viewing the challenge start month
+  const isViewingChallengeStart = currentDate.getMonth() === earliestEventDate.getMonth() &&
+    currentDate.getFullYear() === earliestEventDate.getFullYear()
+
+  // Check if challenge is in the future
+  const isChallengeInFuture = earliestEventDate.getTime() > new Date().setHours(0, 0, 0, 0)
 
   const getTitle = () => {
     if (viewMode === 'month') {
@@ -242,6 +280,15 @@ export function CalendarEnhanced({
             >
               Today
             </button>
+            {/* Show "Start" button for future-dated challenges */}
+            {isChallengeInFuture && !isViewingChallengeStart && (
+              <button
+                onClick={goToChallengeStart}
+                className="px-3 py-1.5 text-sm bg-oa-accent text-white hover:bg-oa-accent/90 rounded-lg transition-colors"
+              >
+                Start
+              </button>
+            )}
             <button
               onClick={navigateNext}
               className="p-2 hover:bg-oa-bg-secondary rounded-lg transition-colors"

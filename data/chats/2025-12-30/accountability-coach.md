@@ -35,3 +35,27 @@ Hey
 No profile found. Please set up your profile in Settings first.
 
 ---
+
+## **You** - 12/30/2025, 8:11:34 PM
+
+What are my calleneges
+
+---
+
+## **Assistant** - 12/30/2025, 8:11:34 PM
+
+No profile found. Please set up your profile in Settings first.
+
+---
+
+## **You** - 12/30/2025, 8:11:54 PM
+
+Hi
+
+---
+
+## **Assistant** - 12/30/2025, 8:11:54 PM
+
+No profile found. Please set up your profile in Settings first.
+
+---

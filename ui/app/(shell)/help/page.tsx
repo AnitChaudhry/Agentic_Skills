@@ -381,8 +381,7 @@ export default function HelpPage() {
           <div>
             <h4 className="font-semibold mb-2">Streaming Responses</h4>
             <p className="text-sm text-oa-text-secondary mb-2">
-              Messages stream in real-time (like ChatGPT) for a natural conversation feel.
-              Powered by Claude Sonnet 4.5.
+              Messages stream in real-time for a natural conversation feel.
             </p>
           </div>
 

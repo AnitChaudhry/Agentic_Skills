@@ -28,24 +28,49 @@ export default function SchedulePage() {
       const todosData = await todosRes.json()
       const todos = Array.isArray(todosData) ? todosData : []
 
+      // Load challenges for start date info
+      const challengesRes = await fetch('/api/challenges')
+      const challengesData = await challengesRes.json()
+      const challenges = challengesData.challenges || []
+
       // Convert challenge tasks to calendar events
       // Group by day and create daily events
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
+      // Group tasks by day to calculate time slots within each day
+      const tasksByDay: Record<string, any[]> = {}
+      challengeTasks.forEach((task: any) => {
+        const key = `${task.challengeId}-${task.day}`
+        if (!tasksByDay[key]) tasksByDay[key] = []
+        tasksByDay[key].push(task)
+      })
 
       const challengeEvents = challengeTasks.map((task: any, index: number) => {
-        // Calculate date relative to TODAY as the reference point
-        // Day 1 = today, Day 2 = tomorrow, etc.
-        // This makes the schedule show current/upcoming tasks based on the current date
-        const taskDate = new Date(today)
+        // Calculate date based on challenge start date + day number
+        const challenge = challenges.find((c: any) => c.id === task.challengeId)
+        // Use challenge start date (e.g., 2026-01-01) or default to today
+        const startDate = challenge?.start_date || challenge?.startDate || challenge?.['start date']
+        const baseDate = startDate ? new Date(startDate) : new Date()
+        baseDate.setHours(0, 0, 0, 0)
+
+        const taskDate = new Date(baseDate)
         taskDate.setDate(taskDate.getDate() + (task.day - 1))
+
+        // Calculate time slot: 9:30 to 10:30, each task is 10 minutes
+        // Find task index within its day
+        const dayKey = `${task.challengeId}-${task.day}`
+        const dayTasks = tasksByDay[dayKey] || []
+        const taskIndexInDay = dayTasks.findIndex((t: any) => t.id === task.id)
+
+        // Start at 9:30, add 10 minutes per task
+        const startMinutes = 30 + (taskIndexInDay * 10) // 30, 40, 50, 60, 70...
+        const startHour = 9 + Math.floor(startMinutes / 60)
+        const startMin = startMinutes % 60
 
         return {
           id: task.id,
           title: task.title,
           date: taskDate.toISOString().split('T')[0],
-          time: `${9 + Math.floor(index % 8)}:00`, // Spread across day
-          duration: task.duration,
+          time: `${startHour}:${startMin.toString().padStart(2, '0')}`,
+          duration: 10, // Each task is 10 minutes
           status: task.completed ? 'completed' : 'pending',
           type: 'challenge-task' as const,
           challengeName: task.challengeName,
@@ -80,12 +105,36 @@ export default function SchedulePage() {
 
   const handleEventStatusChange = async (id: string, status: 'completed' | 'cancelled') => {
     try {
-      // Update event status in backend - use completed boolean for todos
-      await fetch(`/api/todos/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ completed: status === 'completed' }),
-      })
+      // Find the event to check if it's a challenge task
+      const event = events.find(e => e.id === id)
+
+      if (event?.type === 'challenge-task' && event.challengeId && event.day) {
+        // Use challenge-task API to update MD file
+        const res = await fetch('/api/todos/challenge-task', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            taskId: id,
+            completed: status === 'completed',
+            challengeId: event.challengeId,
+            day: event.day,
+            title: event.title
+          }),
+        })
+
+        const data = await res.json()
+        if (!data.success) {
+          console.error('Failed to toggle challenge task:', data.error)
+          return
+        }
+      } else {
+        // Regular todo - use todos API
+        await fetch(`/api/todos/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ completed: status === 'completed' }),
+        })
+      }
 
       // Update local state
       setEvents((prev) =>

@@ -112,7 +112,7 @@ function generateIndexTemplate(data: IndexSection): string {
 
 | Feature | Status | Location | Notes |
 |---------|--------|----------|-------|
-${features.length > 0 ? features.map(f => `| ${f.feature} | ${f.status} | ${f.location} | ${f.notes} |`).join('\n') : '| User Profile | ✅ Active | data/profile/ | Name, timezone, preferences |'}
+${features.length > 0 ? features.map(f => `| ${f.feature} | ${f.status} | ${f.location} | ${f.notes} |`).join('\n') : '| User Profile | ✅ Active | data/profiles/{userId}/ | Name, timezone, preferences |'}
 
 ## User Customizations
 

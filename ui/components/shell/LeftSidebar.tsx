@@ -38,7 +38,7 @@ export function LeftSidebar() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-oa-text-primary tracking-tight">OpenAnalyst</h1>
-            <p className="text-[10px] text-oa-text-secondary uppercase tracking-wide">Powered by Claude</p>
+            <p className="text-[10px] text-oa-text-secondary uppercase tracking-wide">Accountability Coach</p>
           </div>
         </div>
       </div>
@@ -82,6 +82,7 @@ export function LeftSidebar() {
           <h2 className="text-[10px] font-bold text-oa-text-secondary uppercase tracking-wider">Navigate</h2>
         </div>
         <div>
+          <NavSection title="Workspace" href="/workspace" icon="folder" />
           <NavSection title="Schedule" href="/schedule" icon="calendar" />
           <NavSection title="Todos" href="/todos" icon="check-square" count={pendingTodos} />
           <NavSection title="Streaks" href="/streak" icon="flame" />
